@@ -1,4 +1,5 @@
-console.log("SBBC");
+var Ajax = window.eval("Ajax");
+
 // little easteregg
 if (GM_getValue("Beholder")==undefined&&document.getElementById("account_pulldown").textContent.toLocaleUpperCase().includes("BEHOLDER")) {
 	GM_setValue("Beholder","ICU");
@@ -17,4 +18,3 @@ function SteamBBCodesBeholder(State) {
 
 document.addEventListener("Behold",Beholder,false);
 window.eval("var SteamBBCodesBeholder = "+SteamBBCodesBeholder+";");
-console.log("SHBO");

@@ -5,7 +5,7 @@ if (GM_getValue("Beholder")==undefined&&document.getElementById("account_pulldow
 };
 
 function Beholder(HeSeesUs) {
-	if (typeof(HeSeesUs.detail)=="boolean") {
+	if (HeSeesUs&&typeof(HeSeesUs.detail)=="boolean") {
 		GM_setValue("Beholder",HeSeesUs);
 	};
 	return !!GM_getValue("Beholder"); // returning eye state

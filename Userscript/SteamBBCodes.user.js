@@ -11,6 +11,7 @@
 // @match       *://store.steampowered.com/app/*
 // @grant       GM_getValue
 // @grant       GM_setValue
+// @require     http://steamcommunity-a.akamaihd.net/public/javascript/prototype-1.7.js?v=.55t44gwuwgvw
 // @require     https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/Beholder.js
 // @require     https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/SteamBBCodes.js
 // ==/UserScript==

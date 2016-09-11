@@ -1,5 +1,3 @@
-var Ajax = window.eval("Ajax");
-
 // little easteregg
 if (GM_getValue("Beholder")==undefined&&document.getElementById("account_pulldown").textContent.toLocaleUpperCase().includes("BEHOLDER")) {
 	GM_setValue("Beholder","ICU");

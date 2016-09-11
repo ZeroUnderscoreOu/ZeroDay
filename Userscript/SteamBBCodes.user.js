@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 // little easteregg
-window.SteamBBCodesBeholder = function(HeSeesUs) {
+function SteamBBCodesBeholder(HeSeesUs) {
 	if (typeof(HeSeesUs)=="boolean") {
 		GM_setValue("Beholder",HeSeesUs);
 	};
@@ -24,3 +24,4 @@ window.SteamBBCodesBeholder = function(HeSeesUs) {
 if (GM_getValue("Beholder")==undefined&&document.getElementById("account_pulldown").textContent.toLocaleUpperCase().includes("BEHOLDER")) {
 	 GM_setValue("Beholder","ICU");
 };
+window.eval("var SteamBBCodesBeholder = SteamBBCodesBeholder;");

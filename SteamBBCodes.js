@@ -44,7 +44,7 @@ var TagList = { // available tags
 	},
 	Spoiler: {
 		Title: "Spoiler",
-		Offset: SteamBBCodesBeholder()
+		Offset: Beholder()
 			? (-16 * 5).toString(10) + "px 0px"
 			: (-16 * 13).toString(10) + "px 0px",
 		Extended: false

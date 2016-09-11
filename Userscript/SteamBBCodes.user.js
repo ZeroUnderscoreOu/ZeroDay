@@ -9,19 +9,8 @@
 // @exclude     /^https?:\/\/steamcommunity.com\/sharedfiles\/editguidesubsection\/.*/
 // @exclude     /^https?:\/\/steamcommunity.com\/groups\/.*?\/(eventEdit|events|announcements\/hidden)$/
 // @match       *://store.steampowered.com/app/*
-// @run-at      document-end
-// @grant       none
+// @grant       GM_getValue
+// @grant       GM_setValue
+// @require     https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/Beholder.js
 // @require     https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/SteamBBCodes.js
 // ==/UserScript==
-
-// little easteregg
-function SteamBBCodesBeholder(HeSeesUs) {
-	if (typeof(HeSeesUs)=="boolean") {
-		GM_setValue("Beholder",HeSeesUs);
-	};
-	return !!GM_getValue("Beholder"); // returning eye state
-};
-if (GM_getValue("Beholder")==undefined&&document.getElementById("account_pulldown").textContent.toLocaleUpperCase().includes("BEHOLDER")) {
-	 GM_setValue("Beholder","ICU");
-};
-window.eval("var SteamBBCodesBeholder = " + SteamBBCodesBeholder.toString());

@@ -45,8 +45,8 @@ var TagList = { // available tags
 	Spoiler: {
 		Title: "Spoiler",
 		Offset: Beholder()
-			? (-16 * 5).toString(10) + "px 0px"
-			: (-16 * 13).toString(10) + "px 0px",
+			? (-16 * 13).toString(10) + "px 0px"
+			: (-16 * 5).toString(10) + "px 0px",
 		Extended: false
 	},
 	H1: {
@@ -141,7 +141,7 @@ function TextAreaInitialize() {
 function InsertionInitialize() { // I don't make additional check for if any elements were found because it would be just a cycle with 0 iterations in InsertButtons() if not
 	var InsertionPoint = document.getElementsByClassName("commentthread_entry_submitlink"); // has different offset and tag support depending on page
 	console.log("Check\r\n",InsertionPoint);
-	switch (document.location.href) {
+	switch (!!document.location.href) { // needs to be true
 		case document.location.href.includes("/home"): // new comment in activity; trailing slash omitted just in case
 		case document.location.href.includes("/status/"): // new comment in status
 		case document.location.href.includes("/friendactivitydetail/"): // new comment in purchase
@@ -152,7 +152,7 @@ function InsertionInitialize() { // I don't make additional check for if any ele
 			console.log("Point",2);
 			InsertButtons(InsertionPoint,"44px","22px",BBFull);
 			break;
-		case document.location.href.match(/\/(id|profiles|groups)\/[^\/]*\/?$/): // new comment in profile/group
+		case !!document.location.href.match(/\/(id|profiles|groups)\/[^\/]*\/?$/): // new comment in profile/group
 		case document.location.href.includes("/filedetails/"): // new comment in screenshot/artwork/Workshop/Greenlight
 		case document.location.href.includes("announcements/detail/"): // new comment in announcement of a group/game
 		case document.location.href.includes("/recommended/"): // new comment in review
@@ -189,13 +189,13 @@ function InsertionInitialize() { // I don't make additional check for if any ele
 			console.log("Point",7);
 			//if (InsertionPoint) {};
 			break;
-		case document.location.href.match(/\/announcements\/(create|edit)/): // new group announcement
+		case !!document.location.href.match(/\/announcements\/(create|edit)/): // new group announcement
 			InsertionPoint = document.getElementsByClassName("btn_grey_black btn_small_thin")[0]; // "Formatting help" button
 			InsertButtons([InsertionPoint.parentElement],"0px","22px",BBFull); // has a suitable block, but it doesn't have unique handles
 			console.log("Point",8);
 			//if (InsertionPoint&&document.location.href.includes("")) {};
 			break;
-		case document.location.href.match(/\/edit(\/profile)?$/): // user/group profile edit
+		case !!document.location.href.match(/\/edit(\/profile)?$/): // user/group profile edit
 			InsertionPoint = document.getElementsByClassName("btn_grey_black btn_small_thin")[0];
 			InsertButtons([InsertionPoint.parentElement],"0px","22px",BBLimited);
 			console.log("Point",9);
@@ -244,8 +244,8 @@ function InsertButtons(InsertionPoint,ButtonOffset,ButtonHeight,BBExtended,Inser
 		Object.keys(TagList).forEach(function(Match){ // building buttons each time 'cause I need to cycle them anyway after cloning to set event handlers
 			if (BBExtended||!TagList[Match].Extended) { // if all tags are supported or tag isn't an extended one; depends on comment destination; also serves to prevent controls' overlaping
 				let ClonedBase = ButtonBase.cloneNode(true);
-				ClonedBase.title = Match.Title;
-				ClonedBase.querySelector("Img").style["background-position"] = Match.Offset;
+				ClonedBase.title = TagList[Match].Title;
+				ClonedBase.querySelector("Img").style["background-position"] = TagList[Match].Offset;
 				ClonedContainer.appendChild(ClonedBase).addEventListener(
 					"click",
 					BBCode.bind(this,Match),
@@ -261,14 +261,14 @@ function InsertButtons(InsertionPoint,ButtonOffset,ButtonHeight,BBExtended,Inser
 	};
 };
 
-function BBCode(Tag) {
+function BBCode(Tag) { // tags use only "\n" to match form linebreaks in further checks
 	switch (Tag) {
 		case "URL":
 			WrapSelection("["+Tag+"="+prompt("Link:")+"]","[/"+Tag+"]");
 			break;
 		case "List":
 		case "OList":
-			WrapSelectionMultiline("["+Tag+"]\r\n","\r\n[/"+Tag+"]","[*] ");
+			WrapSelectionMultiline("["+Tag+"]\n","\n[/"+Tag+"]","[*] ");
 			break;
 		case "Table":
 			let TableSize = prompt("Table size, width x height:").match(/\s*(\d+)\s*.\s*(\d+)\s*/);
@@ -276,13 +276,13 @@ function BBCode(Tag) {
 				//TableSize[1] = parseInt(TableSize[1],10);
 				//TableSize[2] = parseInt(TableSize[2],10);
 				console.log("Table",TableSize[1],"x",TableSize[2]);
-				let TableStructure = "[Table]\r\n";
+				let TableStructure = "[Table]\n";
 				for (let A=0;A<TableSize[2];A++) {
-					TableStructure += "    [TR]\r\n";
+					TableStructure += "    [TR]\n";
 					for (let B=0;B<TableSize[1];B++) {
-						TableStructure += "        [TD]\r\n        [/TD]\r\n";
+						TableStructure += "        [TD]\n        [/TD]\n";
 					};
-					TableStructure += "    [/TR]\r\n";
+					TableStructure += "    [/TR]\n";
 				};
 				TextArea.element.value += TableStructure + "[/Table]";
 			} else {
@@ -296,28 +296,52 @@ function BBCode(Tag) {
 };
 
 function WrapSelection(Before,After) {
+	var Start = TextArea.selectionStart;
+	var End = TextArea.selectionEnd;
 	var Text = TextArea.value;
+	var Selection = Text.substring(TextArea.selectionStart,TextArea.selectionEnd);
+	if (Selection.startsWith(Before)&&Selection.endsWith(After)) {
+		Selection = Selection.substring(Before.length,Selection.length-After.length);
+		End -= Before.length + After.length;
+	} else {
+		Selection = (Before || "") + Selection + (After || "");
+		End += Before.length + After.length;
+	};
 	TextArea.value = Text.substring(0,TextArea.selectionStart)
-		+ (Before || "")
-		+ Text.substring(TextArea.selectionStart,TextArea.selectionEnd)
-		+ (After || "")
+		+ Selection
 		+ Text.substring(TextArea.selectionEnd,Text.length);
-	TextArea.selectionEnd += Before.length + After.length;
+	TextArea.selectionStart = Start; // preserving selection
+	TextArea.selectionEnd = End;
 };
 
 function WrapSelectionMultiline(Before,After,LineBefore,LineAfter) {
+	var Start = TextArea.selectionStart;
+	var End = TextArea.selectionEnd;
 	var Text = TextArea.value;
-	var Selection = "";
-	var SelectionLength = TextArea.selectionEnd - TextArea.selectionStart;
-	Text.substring(TextArea.selectionStart,TextArea.selectionEnd).split("\n").forEach(function(Match){
-		Selection += (LineBefore || "") + Match + (LineAfter || "") + "\n";
-	});
+	var Selection = Text.substring(TextArea.selectionStart,TextArea.selectionEnd);
+	var SelectionLength = Selection.length;
+	if (Selection.startsWith(Before)&&Selection.endsWith(After)) {
+		Selection = Selection.substring(Before.length,Selection.length-After.length);
+		Selection = Selection.split("\n");
+		Selection.forEach(function(Match,Index){
+			Selection[Index] = Match.substring((LineBefore||"").length,Match.length-(LineAfter||"").length);
+		});
+		Selection = Selection.join("\n");
+		End -= SelectionLength - Selection.length;
+	} else {
+		Selection = Selection.split("\n");
+		Selection.forEach(function(Match,Index){
+			Selection[Index] = (LineBefore || "") + Match + (LineAfter || "");
+		});
+		Selection = Selection.join("\n");
+		Selection = (Before || "") + Selection + (After || "");
+		End += Selection.length - SelectionLength;
+	};
 	TextArea.value = Text.substring(0,TextArea.selectionStart)
-		+ (Before || "")
 		+ Selection
-		+ (After || "")
 		+ Text.substring(TextArea.selectionEnd,Text.length);
-	TextArea.selectionEnd += Before.length + After.length + Selection.length - SelectionLength;
+	TextArea.selectionStart = Start;
+	TextArea.selectionEnd = End;
 };
 
 BBCodesInitialize();

@@ -243,7 +243,7 @@ function InsertButtons(InsertionPoint,ButtonOffset,ButtonHeight,BBExtended,Inser
 		*/
 		Object.keys(TagList).forEach(function(Match){ // building buttons each time 'cause I need to cycle them anyway after cloning to set event handlers
 			if (BBExtended||!TagList[Match].Extended) { // if all tags are supported or tag isn't an extended one; depends on comment destination; also serves to prevent controls' overlaping
-				let ClonedBase = ButtonBase.cloneNode();
+				let ClonedBase = ButtonBase.cloneNode(true);
 				ClonedBase.title = Match.Title;
 				ClonedBase.querySelector("Img").style["background-position"] = Match.Offset;
 				ClonedContainer.appendChild(ClonedBase).addEventListener(

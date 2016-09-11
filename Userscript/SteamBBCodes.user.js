@@ -24,4 +24,4 @@ function SteamBBCodesBeholder(HeSeesUs) {
 if (GM_getValue("Beholder")==undefined&&document.getElementById("account_pulldown").textContent.toLocaleUpperCase().includes("BEHOLDER")) {
 	 GM_setValue("Beholder","ICU");
 };
-window.eval("var SteamBBCodesBeholder = " + SteamBBCodesBeholder);
+window.eval("var SteamBBCodesBeholder = " + SteamBBCodesBeholder.toString());

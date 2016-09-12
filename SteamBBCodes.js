@@ -142,31 +142,32 @@ function InsertionInitialize() { // I don't make additional check for if any ele
 	var InsertionPoint = document.getElementsByClassName("commentthread_entry_submitlink"); // has different offset and tag support depending on page
 	console.log("Check\r\n",InsertionPoint);
 	switch (!!document.location.href) { // needs to be true
-		case document.location.href.includes("/home"): // new comment in activity; trailing slash omitted just in case
+		case document.location.href.includes("/home"): // new status, new comment in activity; trailing slash omitted just in case; no break for the next case
+			console.log("Point",4);
+			InsertionPoint = document.getElementsByClassName("blotter_status_submit_ctn");
+			InsertButtons(InsertionPoint,"40px","24px",BBLimited);
 		case document.location.href.includes("/status/"): // new comment in status
 		case document.location.href.includes("/friendactivitydetail/"): // new comment in purchase
 			console.log("Point",1);
 			InsertButtons(InsertionPoint,"50px","22px",BBLimited);
 			break;
-		case document.location.href.includes("/discussions/"): // new comment on forum
-			console.log("Point",2);
-			InsertButtons(InsertionPoint,"44px","22px",BBFull);
-			break;
+		case document.location.href.includes("/recommended/"): // review edit, new comment in review; no break
+			InsertionPoint = document.getElementById("ReviewEdit");
+			InsertButtons([InsertionPoint],"0px","22px",BBFull,"insertBefore",document.getElementById("ReviewEditTextArea").nextSibling);
+			console.log("Point",7);
+			//if (InsertionPoint) {};
 		case !!document.location.href.match(/\/(id|profiles|groups)\/[^\/]*\/?$/): // new comment in profile/group
 		case document.location.href.includes("/filedetails/"): // new comment in screenshot/artwork/Workshop/Greenlight
 		case document.location.href.includes("announcements/detail/"): // new comment in announcement of a group/game
-		case document.location.href.includes("/recommended/"): // new comment in review
 		case document.location.href.includes("/news/"): // new comment in news; Store & Community has separate news
 		case document.location.href.includes("events/"): // new comment in group event
 			//document.location.href.search(/\/games\/\d*\/announcements\/detail\//) should be no longer needed
 			console.log("Point",3);
 			InsertButtons(InsertionPoint,"44px","22px",BBLimited);
 			break;
-		case document.location.href.includes("/home"): // status
-			console.log("Point",4);
-			InsertionPoint = document.getElementsByClassName("blotter_status_submit_ctn");
-			InsertButtons(InsertionPoint,"40px","24px",BBLimited);
-			break;
+		case document.location.href.includes("/discussions/"): // new comment on forum; no break
+			console.log("Point",2);
+			InsertButtons(InsertionPoint,"44px","22px",BBFull);
 		case document.location.href.includes("/discussions"): // new topic, topic edit; comment edit; trailing slash omitted to work with group forum index
 			console.log("Point",5);
 			InsertionPoint = document.getElementsByClassName("forum_newtopic_action"); // "forum_newtopic_textcontrols" forum_newtopic_area forum_newtopic_box
@@ -181,12 +182,6 @@ function InsertionInitialize() { // I don't make additional check for if any ele
 			InsertionPoint = document.getElementsByClassName("review_controls")[0];
 			InsertButtons([InsertionPoint],"0px","22px",BBFull); // passing 1 element as an array to enable length property; doesn't have suitable block for buttons, passing like this to remove additional checks
 			console.log("Point",6);
-			//if (InsertionPoint) {};
-			break;
-		case document.location.href.includes("/recommended/"): // review edit
-			InsertionPoint = document.getElementById("ReviewEdit");
-			InsertButtons([InsertionPoint],"0px","22px",BBFull,"insertBefore",document.getElementById("ReviewEditTextArea").nextSibling);
-			console.log("Point",7);
 			//if (InsertionPoint) {};
 			break;
 		case !!document.location.href.match(/\/announcements\/(create|edit)/): // new group announcement

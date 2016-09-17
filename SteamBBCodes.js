@@ -15,8 +15,6 @@ https://github.com/ZeroUnderscoreOu/SteamBBCodes
 ! не забыть заменить ZeroDay
 */
 
-var SteamBBCodes = {};
-
 var TextArea;
 var TagList = { // available tags
 	B: {

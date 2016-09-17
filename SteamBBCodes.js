@@ -45,9 +45,9 @@ var TagList = { // available tags
 		Extended: false
 	},
 	Spoiler: {
-		Offset: SteamBBCodes.HeSeesUs
-			? Title: "You are BEHOLDER, you see everything!/r/nType \"SteamBBCodes.Blink\" in browser console to close your eye."
-			: Title: "Spoiler",
+		Title: SteamBBCodes.HeSeesUs
+			? "BEHOLDER/r/nSEE the console."
+			: "Spoiler",
 		Offset: SteamBBCodes.HeSeesUs
 			? (-16 * 13).toString(10) + "px 0px"
 			: (-16 * 5).toString(10) + "px 0px",

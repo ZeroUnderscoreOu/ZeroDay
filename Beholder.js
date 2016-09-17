@@ -1,11 +1,15 @@
 // little easteregg
 var Pulldown = document.getElementById("account_pulldown"); // account menu with nickname
+var SteamBBCodes;
 if (Pulldown
 	&&Pulldown.textContent.toLocaleUpperCase().includes("BEHOLDER")
 	&&GM_getValue("Beholder")==undefined) {
 	GM_setValue("Beholder",true);
 };
-var SteamBBCodes = {
+if (GM_getValue("Beholder")) {
+	console.log("You are Beholder! Type \"SteamBBCodes.Blink()\" here to close your eye and pretend to be normal.");
+};
+SteamBBCodes = {
 	HeSeesUs: GM_getValue("Beholder"),
 	Blink: function(){
 		document.dispatchEvent(new Event("Blink"));

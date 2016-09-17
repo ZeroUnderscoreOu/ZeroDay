@@ -11,9 +11,11 @@
 // @match       *://store.steampowered.com/app/*
 // @grant       GM_getValue
 // @grant       GM_setValue
+// @grant       GM_getResourceURL
 // @grant       GM_getResourceText
 // @require     https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/Beholder.js
-// @resourse    SteamBBCodes https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/SteamBBCodes.js
+// @resource    SteamBBCodes https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/SteamBBCodes.js
 // ==/UserScript==
 
-document.head.appendChild(document.createElement("Script")).textContent = GM_getResourceText("SteamBBCodes");
+document.head.appendChild(document.createElement("Script")).src = GM_getResourceURL("SteamBBCodes");
+//document.head.appendChild(document.createElement("Script")).textContent = GM_getResourceText("SteamBBCodes");

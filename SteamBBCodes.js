@@ -95,6 +95,7 @@ var Responder = { // should keep an eye on unintentionally doubling buttons
 			TextAreaInitialization();
 			InsertionPoint = document.getElementsByClassName("commentthread_edit_buttons");
 			InsertButtons(InsertionPoint,"0px","22px",BBFull);
+			DiscussionsButtonFixer();
 		};
 	}
 };
@@ -178,7 +179,7 @@ function InsertionInitialization() { // I don't make additional check for if any
 			InsertButtons(InsertionPoint,"44px","22px",BBFull);
 			InsertionPoint = document.getElementsByClassName("commentthread_edit_buttons");
 			InsertButtons(InsertionPoint,"0px","22px",BBFull);
-			DiscussionsButtonFixer(); // resizing buttons for consistent look
+			DiscussionsButtonFixer();
 			break;
 		case document.location.href.includes("store.steampowered.com/app/"): // new review
 			console.log("Point",7);
@@ -261,7 +262,7 @@ function InsertButtons(InsertionPoint,ButtonOffset,ButtonHeight,BBExtended,Inser
 	};
 };
 
-function DiscussionsButtonFixer() {
+function DiscussionsButtonFixer() { // resizing buttons for consistent look
 	Array.from(document.querySelectorAll(".forum_newtopic_action > .btn_medium,	.commentthread_edit_buttons > .btn_medium")).forEach(function(Match){
 		Match.classList.toggle("btn_medium"); // turning off
 		Match.classList.toggle("btn_small"); // turning on

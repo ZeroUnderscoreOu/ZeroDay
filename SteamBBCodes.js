@@ -263,8 +263,8 @@ function InsertButtons(InsertionPoint,ButtonOffset,ButtonHeight,BBExtended,Inser
 
 function DiscussionsButtonFixer() {
 	Array.from(document.querySelectorAll(".forum_newtopic_action > .btn_medium,	.commentthread_edit_buttons > .btn_medium")).forEach(function(Match){
-		Match.classList.toggle(".btn_medium"); // turning off
-		Match.classList.toggle(".btn_small"); // turning on
+		Match.classList.toggle("btn_medium"); // turning off
+		Match.classList.toggle("btn_small"); // turning on
 	});
 };
 

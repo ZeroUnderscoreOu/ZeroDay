@@ -15,6 +15,8 @@ https://github.com/ZeroUnderscoreOu/SteamBBCodes
 ! не забыть заменить ZeroDay
 */
 
+var SteamBBCodes = {};
+
 var TextArea;
 var TagList = { // available tags
 	B: {
@@ -43,8 +45,10 @@ var TagList = { // available tags
 		Extended: false
 	},
 	Spoiler: {
-		Title: "Spoiler",
-		Offset: Beholder()
+		Offset: SteamBBCodes.HeSeesUs
+			? Title: "You are BEHOLDER, you see everything!/r/nType \"SteamBBCodes.Blink\" in browser console to close your eye."
+			: Title: "Spoiler",
+		Offset: SteamBBCodes.HeSeesUs
 			? (-16 * 13).toString(10) + "px 0px"
 			: (-16 * 5).toString(10) + "px 0px",
 		Extended: false
@@ -88,7 +92,7 @@ var TagList = { // available tags
 var Responder = { // should keep an eye on unintentionally doubling buttons
 	onComplete: function(AjaxData,XHRData) {
 		if (XHRData.responseJSON&&XHRData.responseJSON.comments_html) { // assuming comments' refresh either by edit or new page
-			TextAreaInitialize();
+			TextAreaInitialization();
 			InsertionPoint = document.getElementsByClassName("commentthread_edit_buttons");
 			InsertButtons(InsertionPoint,"0px","22px",BBFull);
 		};
@@ -112,18 +116,18 @@ ButtonBase.className = "ico16";
 ButtonBase = ButtonBase.parentElement;
 //ButtonContainer.style["vertical-align"] = "Middle";
 
-function BBCodesInitialize() {
+function BBCodesInitialization() {
 	var TempElem;
 	var TextAreas = document.body.getElementsByTagName("TextArea");
 	if (TextAreas.length>0) { // if there is a textarea, probably it's for comments
 		document.head.appendChild(ButtonStyle);
-		TextAreaInitialize();
+		TextAreaInitialization();
 		Ajax.Responders.register(Responder); // reinserting buttons in case of comment reloading - new post/edited post/new page
-		InsertionInitialize();
+		InsertionInitialization();
 	};
 };
 
-function TextAreaInitialize() {
+function TextAreaInitialization() {
 	var TextAreas = document.body.getElementsByTagName("TextArea");
 	if (TextAreas.length>0) { // if there is a textarea, probably it's for comments
 		for (let A=0;A<TextAreas.length;A++) {
@@ -138,7 +142,7 @@ function TextAreaInitialize() {
 	};
 };
 
-function InsertionInitialize() { // I don't make additional check for if any elements were found because it would be just a cycle with 0 iterations in InsertButtons() if not
+function InsertionInitialization() { // I don't make additional check for if any elements were found because it would be just a cycle with 0 iterations in InsertButtons() if not
 	var InsertionPoint = document.getElementsByClassName("commentthread_entry_submitlink"); // has different offset and tag support depending on page
 	console.log("Check\r\n",InsertionPoint);
 	switch (!!document.location.href) { // needs to be true
@@ -339,5 +343,5 @@ function WrapSelectionMultiline(Before,After,LineBefore,LineAfter) {
 	TextArea.selectionEnd = End;
 };
 
-BBCodesInitialize();
+BBCodesInitialization();
 //Ajax.Responders.unregister(Responder);

@@ -147,18 +147,18 @@ function InsertionInitialization() { // I don't make additional check for if any
 	console.log("Check\r\n",InsertionPoint);
 	switch (!!document.location.href) { // needs to be true
 		case document.location.href.includes("/home"): // new status, new comment in activity; trailing slash omitted just in case; no break for the next case
-			console.log("Point",4);
+			console.log("Point",1);
 			InsertionPoint = document.getElementsByClassName("blotter_status_submit_ctn");
 			InsertButtons(InsertionPoint,"40px","24px",BBLimited);
 		case document.location.href.includes("/status/"): // new comment in status
 		case document.location.href.includes("/friendactivitydetail/"): // new comment in purchase
-			console.log("Point",1);
+			console.log("Point",2);
 			InsertButtons(InsertionPoint,"50px","22px",BBLimited);
 			break;
 		case document.location.href.includes("/recommended/"): // review edit, new comment in review; no break
+			console.log("Point",3);
 			InsertionPoint = document.getElementById("ReviewEdit");
 			InsertButtons([InsertionPoint],"0px","22px",BBFull,"insertBefore",document.getElementById("ReviewEditTextArea").nextSibling);
-			console.log("Point",7);
 			//if (InsertionPoint) {};
 		case !!document.location.href.match(/\/(id|profiles|groups)\/[^\/]*\/?$/): // new comment in profile/group
 		case document.location.href.includes("/filedetails/"): // new comment in screenshot/artwork/Workshop/Greenlight
@@ -166,49 +166,50 @@ function InsertionInitialization() { // I don't make additional check for if any
 		case document.location.href.includes("/news/"): // new comment in news; Store & Community has separate news
 		case document.location.href.includes("events/"): // new comment in group event
 			//document.location.href.search(/\/games\/\d*\/announcements\/detail\//) should be no longer needed
-			console.log("Point",3);
+			console.log("Point",4);
 			InsertButtons(InsertionPoint,"44px","22px",BBLimited);
 			break;
 		case document.location.href.includes("/discussions/"): // new comment on forum; no break
-			console.log("Point",2);
+			console.log("Point",5);
 			InsertButtons(InsertionPoint,"44px","22px",BBFull);
 		case document.location.href.includes("/discussions"): // new topic, topic edit; comment edit; trailing slash omitted to work with group forum index
-			console.log("Point",5);
+			console.log("Point",6);
 			InsertionPoint = document.getElementsByClassName("forum_newtopic_action"); // "forum_newtopic_textcontrols" forum_newtopic_area forum_newtopic_box
 			InsertButtons(InsertionPoint,"44px","22px",BBFull);
 			InsertionPoint = document.getElementsByClassName("commentthread_edit_buttons");
 			InsertButtons(InsertionPoint,"0px","22px",BBFull);
+			DiscussionsButtonFixer(); // resizing buttons for consistent look
 			break;
 		case document.location.href.includes("store.steampowered.com/app/"): // new review
+			console.log("Point",7);
 			ButtonContainer.style.float = "none"; // prventing siblings from being on the same line
 			ButtonContainer.style["margin-bottom"] = "9px";
 			//InsertionPoint = document.getElementsByClassName("review_controls_right")[0];
 			InsertionPoint = document.getElementsByClassName("review_controls")[0];
 			InsertButtons([InsertionPoint],"0px","22px",BBFull); // passing 1 element as an array to enable length property; doesn't have suitable block for buttons, passing like this to remove additional checks
-			console.log("Point",6);
 			//if (InsertionPoint) {};
 			break;
 		case !!document.location.href.match(/\/announcements\/(create|edit)/): // new group announcement
+			console.log("Point",8);
 			InsertionPoint = document.getElementsByClassName("btn_grey_black btn_small_thin")[0]; // "Formatting help" button
 			InsertButtons([InsertionPoint.parentElement],"0px","22px",BBFull); // has a suitable block, but it doesn't have unique handles
-			console.log("Point",8);
 			//if (InsertionPoint&&document.location.href.includes("")) {};
 			break;
 		case !!document.location.href.match(/\/edit(\/profile)?$/): // user/group profile edit
+			console.log("Point",9);
 			InsertionPoint = document.getElementsByClassName("btn_grey_black btn_small_thin")[0];
 			InsertButtons([InsertionPoint.parentElement],"0px","22px",BBLimited);
-			console.log("Point",9);
 			break;
 		case document.location.href.includes("/itemedittext/"): // screenshot/artwork/workshop edit
+			console.log("Point",10);
 			ButtonContainer.style["margin-top"] = "5px";
 			InsertionPoint = document.getElementById("ItemEditText");
 			InsertButtons([InsertionPoint],"158px","22px",BBFull,"insertBefore",InsertionPoint.getElementsByClassName("btn_green_white_innerfade btn_medium")[0]); // I already use insertBefore, MB refactor other way?
-			console.log("Point",10);
 			break;
 		case document.location.href.includes("/sharedfiles/edititem/"):
+			console.log("Point",11);
 			InsertionPoint = document.getElementsByClassName("workshopDescContainer")[0];
 			InsertButtons([InsertionPoint.lastElementChild],"0px","22px",BBFull);
-			console.log("Point",11);
 			break;
 		default: // kinda default
 			if (InsertionPoint.length>0) {
@@ -258,6 +259,13 @@ function InsertButtons(InsertionPoint,ButtonOffset,ButtonHeight,BBExtended,Inser
 			InsertionPoint[A].insertBefore(ClonedContainer,InsertionPoint[A].firstElementChild); // inserting buttons
 		};
 	};
+};
+
+function DiscussionsButtonFixer() {
+	Array.from(document.querySelectorAll(".forum_newtopic_action > .btn_medium,	.commentthread_edit_buttons > .btn_medium")).forEach(function(Match){
+		Match.classList.toggle(".btn_medium"); // turning off
+		Match.classList.toggle(".btn_small"); // turning on
+	});
 };
 
 function BBCode(Tag) { // tags use only "\n" to match form linebreaks in further checks

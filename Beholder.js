@@ -18,7 +18,6 @@ function BlinkBack() {
 
 document.addEventListener("Blink",BlinkBack,false);
 window.eval("var SteamBBCodes = "+SteamBBCodes.toSource()+";");
-document.head.appendChild(document.createElement("Script")).src = GM_getResourceURL("SteamBBCodes");
 
 /*
 function BackListener(State) {

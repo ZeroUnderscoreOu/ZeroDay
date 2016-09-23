@@ -1,5 +1,5 @@
 /*
-Steam BBCodes userscript 1.2.0
+Steam BBCodes userscript 1.3.0
 Written by ZeroUnderscoreOu
 http://steamcommunity.com/id/ZeroUnderscoreOu/
 http://steamcommunity.com/groups/0_oWassup/discussions/4/
@@ -12,10 +12,15 @@ https://github.com/ZeroUnderscoreOu/SteamBBCodes
 
 /* ToDO
 (возможно) переписать создание кнопок полностью динамически, без клонирования; создавать ButtonContainer динамически; придумать, как передавать стили для него
-! не забыть заменить ZeroDay
+(возможно) переписать массивы из одного элемента и сложные селекторы в InsertionInitialization()
 */
 
-var TextArea;
+"use strict";
+var CurTextArea; // selected textarea
+var ButtonContainer = document.createElement("Div"); // buttons' container;
+var ButtonBase = document.createElement("Button"); // button template;
+var BBFull = true; // booleans for clearer calls of ButtonInsertion()
+var BBLimited = false;
 var TagList = { // available tags
 	B: {
 		Title: "Bold",
@@ -44,7 +49,7 @@ var TagList = { // available tags
 	},
 	Spoiler: {
 		Title: SteamBBCodes.HeSeesUs
-			? "BEHOLDER/r/nSEE the console."
+			? "BEHOLDER\r\nSee the console"
 			: "Spoiler",
 		Offset: SteamBBCodes.HeSeesUs
 			? (-16 * 13).toString(10) + "px 0px"
@@ -87,159 +92,165 @@ var TagList = { // available tags
 		Extended: true
 	}
 };
-var Responder = { // should keep an eye on unintentionally doubling buttons
+var Responder = { // reinserting buttons - new post/edited post/new page on forum; announcement/event/comment in group
 	onComplete: function(AjaxData,XHRData) {
-		if (XHRData.responseJSON&&XHRData.responseJSON.comments_html) { // assuming comments' refresh either by edit or new page
-			TextAreaInitialization();
-			InsertionPoint = document.getElementsByClassName("commentthread_edit_buttons");
-			InsertButtons(InsertionPoint,"0px","22px",BBFull);
-			DiscussionsButtonFixer();
+		let URLHash = document.location.hash;
+		if ((document.location.pathname.includes("/discussions")||document.location.pathname.includes("/reporteddiscussions/"))
+			&&XHRData.responseJSON
+			&&XHRData.responseJSON.comments_html) { // comments' refresh either by edit or new page
+			let InsertionPoint = document.getElementsByClassName("commentthread_edit_buttons");
+			let TextArea = document.getElementsByClassName("commentthread_textarea")
+			TextAreaInitialization(TextArea);
+			console.log("Point",13,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"0px","22px",BBFull);
+			DiscussionsButtonFix();
+		};
+		if ((URLHash.includes("announcements/detail/")||URLHash.includes("comments")||URLHash.includes("events/"))
+			&&XHRData.responseText
+			&&XHRData.responseText.includes("group_tab_content_announcements")) { // event details
+			let InsertionPoint = document.querySelectorAll("#group_tab_content_announcements .commentthread_entry_submitlink");
+			let TextArea = document.querySelectorAll("#group_tab_content_announcements .commentthread_textarea");
+			TextAreaInitialization(TextArea);
+			console.log("Point",14,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"44px","22px",BBLimited);
 		};
 	}
 };
-var ButtonContainer = document.createElement("Div"); // buttons' container;
-var ButtonBase = document.createElement("Button"); // button template;
-var ButtonStyle = document.createElement("Style");
-var TriggerCheck = false; // check for rules' triggering
-var BBFull = true; // booleans for clearer calls of InsertButtons()
-var BBLimited = false;
-ButtonStyle.type = "Text/CSS";
-ButtonStyle.textContent = ".BBCodeContainer {Position: Relative; Float: Left;}"
-	+ "Button.BBCodeButton {Margin-Right: 4px; Vertical-Align: Middle;}"
-	+ "Button.BBCodeButton .ico16 {Width: 16px; Height: 16px; Vertical-Align: Middle; Background-Image: URL(https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/BackgroundIcons.png);}";
 ButtonContainer.className = "BBCodeContainer";
 ButtonBase.type = "Button";
 ButtonBase.className = "btn_grey_black BBCodeButton";
 ButtonBase = ButtonBase.appendChild(document.createElement("Img"));
 ButtonBase.className = "ico16";
 ButtonBase = ButtonBase.parentElement;
-//ButtonContainer.style["vertical-align"] = "Middle";
+BBCodesInitialization();
 
 function BBCodesInitialization() {
-	var TempElem;
-	var TextAreas = document.body.getElementsByTagName("TextArea");
-	if (TextAreas.length>0) { // if there is a textarea, probably it's for comments
+var TextArea = document.body.getElementsByTagName("TextArea");
+	if (TextArea.length) { // if there is a textarea, probably it's for comments
+		let ButtonStyle = document.createElement("Style");
+		ButtonStyle.type = "Text/CSS";
+		ButtonStyle.textContent =
+			".BBCodeContainer {Position: Relative; Float: Left;}"
+			+ "Button.BBCodeButton {Margin-Right: 4px;}"
+			+ "Button.BBCodeButton .ico16 {Width: 16px; Height: 16px; Vertical-Align: Middle; Background-Image: URL(https://raw.githubusercontent.com/ZeroUnderscoreOu/SteamBBCodes/master/BackgroundIcons.png);}";
 		document.head.appendChild(ButtonStyle);
-		TextAreaInitialization();
-		Ajax.Responders.register(Responder); // reinserting buttons in case of comment reloading - new post/edited post/new page
+		TextAreaInitialization(TextArea);
 		InsertionInitialization();
-	};
-};
-
-function TextAreaInitialization() {
-	var TextAreas = document.body.getElementsByTagName("TextArea");
-	if (TextAreas.length>0) { // if there is a textarea, probably it's for comments
-		for (let A=0;A<TextAreas.length;A++) {
-			TextAreas[A].addEventListener(
-				"focus",
-				function(){TextArea=this},
-				false
-			);
-		};
 	} else {
-		alert("No textareas on "+document.location.href); //console.log
+		alert("Steam BBCodes found no textareas on\r\n"+document.location.href); // should remove this check later
 	};
 };
 
-function InsertionInitialization() { // I don't make additional check for if any elements were found because it would be just a cycle with 0 iterations in InsertButtons() if not
-	var InsertionPoint = document.getElementsByClassName("commentthread_entry_submitlink"); // has different offset and tag support depending on page
-	console.log("Check\r\n",InsertionPoint);
-	switch (!!document.location.href) { // needs to be true
-		case document.location.href.includes("/home"): // new status, new comment in activity; trailing slash omitted just in case; no break for the next case
-			console.log("Point",1);
+function TextAreaInitialization(TextArea) {
+	for (let A=0;A<TextArea.length;A++) { // forEach
+		TextArea[A].addEventListener(
+			"focus",
+			function(){CurTextArea=this},
+			false
+		);
+	};
+};
+
+function InsertionInitialization() { // I don't make additional check for if any elements were found because it would be just a cycle with 0 iterations in ButtonInsertion() if not
+	var InsertionPoint; // preventing repeated declaration in cases; has different offset and tag support depending on page
+	var URLPath = document.location.pathname;
+	var URLHash = document.location.hash;
+	switch (true) { // needs to be true
+		case URLPath.includes("/home"): // new status, new comment in activity; trailing slash omitted just in case; no break for the next case
 			InsertionPoint = document.getElementsByClassName("blotter_status_submit_ctn");
-			InsertButtons(InsertionPoint,"40px","24px",BBLimited);
-		case document.location.href.includes("/status/"): // new comment in status
-		case document.location.href.includes("/friendactivitydetail/"): // new comment in purchase
-			console.log("Point",2);
-			InsertButtons(InsertionPoint,"50px","22px",BBLimited);
+			console.log("Point",1,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"40px","24px",BBLimited);
+		case URLPath.includes("/status/"): // new comment in status
+		case URLPath.includes("/friendactivitydetail/"): // new comment in purchase
+			InsertionPoint = document.getElementsByClassName("commentthread_entry_submitlink");
+			console.log("Point",2,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"50px","22px",BBLimited);
 			break;
-		case document.location.href.includes("/recommended/"): // review edit, new comment in review; no break
-			console.log("Point",3);
-			InsertionPoint = document.getElementById("ReviewEdit");
-			InsertButtons([InsertionPoint],"0px","22px",BBFull,"insertBefore",document.getElementById("ReviewEditTextArea").nextSibling);
+		case URLPath.includes("/recommended/"): // new comment in review, review edit; no break
+			InsertionPoint = [document.getElementById("ReviewEdit")]; // making a 1 element array to enable length property
+			console.log("Point",3,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"0px","22px",BBFull,"insertBefore",document.getElementById("ReviewEditTextArea").nextSibling);
 			//if (InsertionPoint) {};
-		case !!document.location.href.match(/\/(id|profiles|groups)\/[^\/]*\/?$/): // new comment in profile/group
-		case document.location.href.includes("/filedetails/"): // new comment in screenshot/artwork/Workshop/Greenlight
-		case document.location.href.includes("announcements/detail/"): // new comment in announcement of a group/game
-		case document.location.href.includes("/news/"): // new comment in news; Store & Community has separate news
-		case document.location.href.includes("events/"): // new comment in group event
-			//document.location.href.search(/\/games\/\d*\/announcements\/detail\//) should be no longer needed
-			console.log("Point",4);
-			InsertButtons(InsertionPoint,"44px","22px",BBLimited);
+		case !!URLPath.match(/\/(id|profiles|groups)\/[^\/]+\/?$/): // new comment in profile/group
+		case URLPath.includes("/sharedfiles/filedetails/"): // new comment in screenshot/artwork/Workshop/Greenlight
+		case document.location.href.includes("announcements/detail/"): // new comment in announcement of a group/game; may be either path or hash
+		case URLPath.includes("/news/"): // new comment in news; Store & Community has separate news
+		//case URLHash.includes("events/"): // new comment in group event; falls under group path match
+		//case URLHash.includes("comments"): // new comment on group's comments page; falls under group path match
+		case URLPath.includes("/allcomments"): // new comment on profile's comments page
+			InsertionPoint = document.getElementsByClassName("commentthread_entry_submitlink");
+			console.log("Point",4,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"44px","22px",BBLimited);
+			Ajax.Responders.register(Responder);
 			break;
-		case document.location.href.includes("/discussions/"): // new comment on forum; no break
-			console.log("Point",5);
-			InsertButtons(InsertionPoint,"44px","22px",BBFull);
-		case document.location.href.includes("/discussions"): // new topic, topic edit; comment edit; trailing slash omitted to work with group forum index
-			console.log("Point",6);
-			InsertionPoint = document.getElementsByClassName("forum_newtopic_action"); // "forum_newtopic_textcontrols" forum_newtopic_area forum_newtopic_box
-			InsertButtons(InsertionPoint,"44px","22px",BBFull);
+		case !!URLPath.match(/\/discussions(\/forum)?\/\d{1,2}\/\d+/): // new comment, comment edit on forum; no break
+		case URLPath.includes("/reporteddiscussions/"): // new comment in report
+			InsertionPoint = document.getElementsByClassName("commentthread_entry_submitlink");
+			console.log("Point",5.1,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"44px","22px",BBFull);
 			InsertionPoint = document.getElementsByClassName("commentthread_edit_buttons");
-			InsertButtons(InsertionPoint,"0px","22px",BBFull);
-			DiscussionsButtonFixer();
+			console.log("Point",5.2,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"0px","22px",BBFull);
+			Ajax.Responders.register(Responder);
+		case URLPath.includes("/discussions"): // new topic, topic edit on forum; report edit; trailing slash omitted to work with group forum index
+			InsertionPoint = document.querySelectorAll(".forum_newtopic_action:Not([Id*='throbber'])"); // avoiding the throbber // forum_newtopic_textcontrols
+			console.log("Point",6,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"44px","22px",BBFull);
+			DiscussionsButtonFix();
 			break;
 		case document.location.href.includes("store.steampowered.com/app/"): // new review
-			console.log("Point",7);
 			ButtonContainer.style.float = "none"; // prventing siblings from being on the same line
 			ButtonContainer.style["margin-bottom"] = "9px";
 			//InsertionPoint = document.getElementsByClassName("review_controls_right")[0];
-			InsertionPoint = document.getElementsByClassName("review_controls")[0];
-			InsertButtons([InsertionPoint],"0px","22px",BBFull); // passing 1 element as an array to enable length property; doesn't have suitable block for buttons, passing like this to remove additional checks
+			InsertionPoint = [document.getElementsByClassName("review_controls")[0]];
+			console.log("Point",7,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"0px","22px",BBFull); // doesn't have suitable block for buttons, passing like this to remove additional checks
 			//if (InsertionPoint) {};
 			break;
-		case !!document.location.href.match(/\/announcements\/(create|edit)/): // new group announcement
-			console.log("Point",8);
-			InsertionPoint = document.getElementsByClassName("btn_grey_black btn_small_thin")[0]; // "Formatting help" button
-			InsertButtons([InsertionPoint.parentElement],"0px","22px",BBFull); // has a suitable block, but it doesn't have unique handles
-			//if (InsertionPoint&&document.location.href.includes("")) {};
+		case !!URLPath.match(/\/announcements\/(create|edit)/): // new group announcement
+			ButtonContainer.style.top = "1px";
+			InsertionPoint = [document.getElementsByClassName("btn_grey_black btn_small_thin")[0].parentElement]; // "Formatting help" button; has a suitable block, but it doesn't have unique handles
+			console.log("Point",8,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"0px","22px",BBFull);
+			//if (InsertionPoint&&URLPath.includes("")) {};
 			break;
-		case !!document.location.href.match(/\/edit(\/profile)?$/): // user/group profile edit
-			console.log("Point",9);
-			InsertionPoint = document.getElementsByClassName("btn_grey_black btn_small_thin")[0];
-			InsertButtons([InsertionPoint.parentElement],"0px","22px",BBLimited);
+		case !!URLPath.match(/\/edit(\/profile)?$/): // user/group profile edit
+			ButtonContainer.style.top = "1px";
+			InsertionPoint = [document.getElementsByClassName("btn_grey_black btn_small_thin")[0].parentElement];
+			console.log("Point",9,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"0px","22px",BBLimited);
 			break;
-		case document.location.href.includes("/itemedittext/"): // screenshot/artwork/workshop edit
-			console.log("Point",10);
+		case URLPath.includes("/sharedfiles/itemedittext/"): // screenshot/artwork/workshop edit
 			ButtonContainer.style["margin-top"] = "5px";
-			InsertionPoint = document.getElementById("ItemEditText");
-			InsertButtons([InsertionPoint],"158px","22px",BBFull,"insertBefore",InsertionPoint.getElementsByClassName("btn_green_white_innerfade btn_medium")[0]); // I already use insertBefore, MB refactor other way?
+			InsertionPoint = [document.getElementById("ItemEditText")];
+			console.log("Point",10,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"158px","22px",BBFull,"insertBefore",InsertionPoint[0].getElementsByClassName("btn_green_white_innerfade btn_medium")[0]); // I already use insertBefore, MB refactor other way?
 			break;
-		case document.location.href.includes("/sharedfiles/edititem/"):
-			console.log("Point",11);
-			InsertionPoint = document.getElementsByClassName("workshopDescContainer")[0];
-			InsertButtons([InsertionPoint.lastElementChild],"0px","22px",BBFull);
+		case URLPath.includes("/sharedfiles/edititem/"): // new artwork
+			InsertionPoint = [document.getElementsByClassName("workshopDescContainer")[0].lastElementChild];
+			console.log("Point",11,InsertionPoint.length);
+			ButtonInsertion(InsertionPoint,"0px","22px",BBFull);
 			break;
 		default: // kinda default
-			if (InsertionPoint.length>0) {
-				console.log("Point",12);
-				InsertButtons(InsertionPoint,"44px","22px",BBLimited);
-				alert("Steam BBCodes inserted at default point - report this page\r\n"+document.location.href);
+			InsertionPoint = document.getElementsByClassName("commentthread_entry_submitlink");
+			if (InsertionPoint.length) {
+				console.log("Point",12,InsertionPoint.length);
+				ButtonInsertion(InsertionPoint,"44px","22px",BBLimited);
+				alert("Steam BBCodes inserted at default point\r\n"+document.location.href);
 			} else {
-				console.log("Point",00);
-				alert("Steam BBCodes has no place to insert at\r\n"+document.location.href);
+				console.log("Point",0,InsertionPoint.length);
+				alert("Steam BBCodes has no place to insert to\r\n"+document.location.href);
 			};
 			break;
 	};
-	if (!TriggerCheck) {
-		alert("Didn't trigger\r\n"+document.location.href);
-	};
 };
 
-function InsertButtons(InsertionPoint,ButtonOffset,ButtonHeight,BBExtended,InsertionFunction,InsertionRelation) {
-	TriggerCheck = true; // check
+function ButtonInsertion(InsertionPoint,ButtonOffset,ButtonHeight,BBExtended,InsertionFunction,InsertionRelation) {
 	ButtonContainer.style.left = ButtonOffset; // changing dynamically according to insertion point
 	ButtonBase.style.width = ButtonHeight; // ["min-width"]
 	ButtonBase.style.height = ButtonHeight;
-	for (let A=0;A<InsertionPoint.length;A++) {
-		console.log("Log",InsertionPoint.length,"/",A+1,ButtonOffset,ButtonHeight,BBExtended,InsertionPoint[A]);
+	for (let A=0;A<InsertionPoint.length;A++) { // forEach()
 		let ClonedContainer = ButtonContainer.cloneNode(true);
-		/*
-		var RestyledButtons = InsertionPoint[A].getElementsByClassName("btn_medium");
-		for (let C=RestyledButtons.length-1;C>=0;C--) { // live collection
-			RestyledButtons[C].className = RestyledButtons[C].className.replace("btn_medium","btn_small"); // resizing buttons
-		};
-		*/
 		Object.keys(TagList).forEach(function(Match){ // building buttons each time 'cause I need to cycle them anyway after cloning to set event handlers
 			if (BBExtended||!TagList[Match].Extended) { // if all tags are supported or tag isn't an extended one; depends on comment destination; also serves to prevent controls' overlaping
 				let ClonedBase = ButtonBase.cloneNode(true);
@@ -260,10 +271,10 @@ function InsertButtons(InsertionPoint,ButtonOffset,ButtonHeight,BBExtended,Inser
 	};
 };
 
-function DiscussionsButtonFixer() { // resizing buttons for consistent look
+function DiscussionsButtonFix() { // resizing buttons for consistent look
 	Array.from(document.querySelectorAll(".forum_newtopic_action > .btn_medium,	.commentthread_edit_buttons > .btn_medium")).forEach(function(Match){
-		Match.classList.toggle("btn_medium"); // turning off
-		Match.classList.toggle("btn_small"); // turning on
+		Match.classList.toggle("btn_medium"); // medium size off
+		Match.classList.toggle("btn_small"); // small size on
 	});
 };
 
@@ -279,10 +290,11 @@ function BBCode(Tag) { // tags use only "\n" to match form linebreaks in further
 		case "Table":
 			let TableSize = prompt("Table size, width x height:").match(/\s*(\d+)\s*.\s*(\d+)\s*/);
 			if (TableSize) {
-				//TableSize[1] = parseInt(TableSize[1],10);
-				//TableSize[2] = parseInt(TableSize[2],10);
-				console.log("Table",TableSize[1],"x",TableSize[2]);
+				let Start = CurTextArea.selectionEnd;
+				let Text = CurTextArea.value;
 				let TableStructure = "[Table]\n";
+				TableSize[1] = parseInt(TableSize[1],10);
+				TableSize[2] = parseInt(TableSize[2],10);
 				for (let A=0;A<TableSize[2];A++) {
 					TableStructure += "    [TR]\n";
 					for (let B=0;B<TableSize[1];B++) {
@@ -290,7 +302,12 @@ function BBCode(Tag) { // tags use only "\n" to match form linebreaks in further
 					};
 					TableStructure += "    [/TR]\n";
 				};
-				TextArea.element.value += TableStructure + "[/Table]";
+				TableStructure += "[/Table]";
+				CurTextArea.value = Text.substring(0,CurTextArea.selectionEnd)
+					+ TableStructure
+					+ Text.substring(CurTextArea.selectionEnd,Text.length);
+				CurTextArea.selectionStart = Start;
+				CurTextArea.selectionEnd = Start + TableStructure.length;
 			} else {
 				alert("Wrong dimensions.");
 			};
@@ -302,10 +319,10 @@ function BBCode(Tag) { // tags use only "\n" to match form linebreaks in further
 };
 
 function WrapSelection(Before,After) {
-	var Start = TextArea.selectionStart;
-	var End = TextArea.selectionEnd;
-	var Text = TextArea.value;
-	var Selection = Text.substring(TextArea.selectionStart,TextArea.selectionEnd);
+	var Start = CurTextArea.selectionStart;
+	var End = CurTextArea.selectionEnd;
+	var Text = CurTextArea.value;
+	var Selection = Text.substring(CurTextArea.selectionStart,CurTextArea.selectionEnd);
 	if (Selection.startsWith(Before)&&Selection.endsWith(After)) {
 		Selection = Selection.substring(Before.length,Selection.length-After.length);
 		End -= Before.length + After.length;
@@ -313,18 +330,18 @@ function WrapSelection(Before,After) {
 		Selection = (Before || "") + Selection + (After || "");
 		End += Before.length + After.length;
 	};
-	TextArea.value = Text.substring(0,TextArea.selectionStart)
+	CurTextArea.value = Text.substring(0,CurTextArea.selectionStart)
 		+ Selection
-		+ Text.substring(TextArea.selectionEnd,Text.length);
-	TextArea.selectionStart = Start; // preserving selection
-	TextArea.selectionEnd = End;
+		+ Text.substring(CurTextArea.selectionEnd,Text.length);
+	CurTextArea.selectionStart = Start; // preserving selection
+	CurTextArea.selectionEnd = End;
 };
 
 function WrapSelectionMultiline(Before,After,LineBefore,LineAfter) {
-	var Start = TextArea.selectionStart;
-	var End = TextArea.selectionEnd;
-	var Text = TextArea.value;
-	var Selection = Text.substring(TextArea.selectionStart,TextArea.selectionEnd);
+	var Start = CurTextArea.selectionStart;
+	var End = CurTextArea.selectionEnd;
+	var Text = CurTextArea.value;
+	var Selection = Text.substring(CurTextArea.selectionStart,CurTextArea.selectionEnd);
 	var SelectionLength = Selection.length;
 	if (Selection.startsWith(Before)&&Selection.endsWith(After)) {
 		Selection = Selection.substring(Before.length,Selection.length-After.length);
@@ -343,12 +360,11 @@ function WrapSelectionMultiline(Before,After,LineBefore,LineAfter) {
 		Selection = (Before || "") + Selection + (After || "");
 		End += Selection.length - SelectionLength;
 	};
-	TextArea.value = Text.substring(0,TextArea.selectionStart)
+	CurTextArea.value = Text.substring(0,CurTextArea.selectionStart)
 		+ Selection
-		+ Text.substring(TextArea.selectionEnd,Text.length);
-	TextArea.selectionStart = Start;
-	TextArea.selectionEnd = End;
+		+ Text.substring(CurTextArea.selectionEnd,Text.length);
+	CurTextArea.selectionStart = Start;
+	CurTextArea.selectionEnd = End;
 };
 
-BBCodesInitialization();
 //Ajax.Responders.unregister(Responder);

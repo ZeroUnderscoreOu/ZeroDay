@@ -1,3 +1,5 @@
+console.log("Begin");
+console.log(1,window.eval);
 var Userscript = document.createElement("Script");
 Userscript.type = "Text/JavaScript";
 Userscript.textContent =
@@ -30,3 +32,4 @@ function BlinkBack() {
 
 document.addEventListener("Blink",BlinkBack,false);
 window.eval("var SteamBBCodes = "+SteamBBCodes);
+console.log("End");

@@ -10,12 +10,12 @@ if (GM_getValue("Beholder")) {
 	console.log("You are Beholder! Type \"SteamBBCodes.Blink()\" here and reload the page to close your eye and pretend to be normal.");
 };
 SteamBBCodes = // Chrome doesn't support Object.toSource()
-	'{'
-		+ 'HeSeesUs: ' + GM_getValue("Beholder") + ','
-		+ 'Blink: function(){'
-			+ 'document.dispatchEvent(new Event("Blink"));'
-		+ '}'
-	+ '};';
+	'{' /
+		'HeSeesUs: ' + GM_getValue("Beholder") + ',' /
+		'Blink: function(){' /
+			'document.dispatchEvent(new Event("Blink"));' /
+		'}' /
+	'};';
 
 function BlinkBack() {
 	GM_setValue("Beholder",!GM_getValue("Beholder"));

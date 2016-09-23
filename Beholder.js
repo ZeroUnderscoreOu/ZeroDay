@@ -1,3 +1,10 @@
+var Userscript = document.createElement("Script");
+Userscript.type = "Text/JavaScript";
+Userscript.textContent =
+	"(function(){" /
+	GM_getResourceText("SteamBBCodes") /
+	"})();";
+document.head.appendChild(Userscript);
 // little easteregg
 var Pulldown = document.getElementById("account_pulldown"); // account menu with nickname
 var SteamBBCodes;

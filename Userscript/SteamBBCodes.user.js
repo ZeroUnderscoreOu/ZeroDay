@@ -22,7 +22,7 @@
 var Userscript = document.createElement("Script");
 Userscript.type = "Text/JavaScript";
 Userscript.textContent =
-	"(function(){"
-	+ GM_getResourceText("SteamBBCodes")
-	+ "})();";
+	"(function(){" /
+	GM_getResourceText("SteamBBCodes") /
+	"})();";
 document.head.appendChild(Userscript);

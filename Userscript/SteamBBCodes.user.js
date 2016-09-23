@@ -16,5 +16,5 @@
 // @grant       GM_setValue
 // @grant       GM_getResourceText
 // @require     https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/Beholder.js
-// @resource    SteamBBCodes https://raw.githubusercontent.com/ZeroUnderscoreOu/SteamBBCodes/master/SteamBBCodes.js
+// @resource    SteamBBCodes https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/SteamBBCodes.js
 // ==/UserScript==

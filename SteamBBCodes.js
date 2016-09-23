@@ -16,6 +16,7 @@ https://github.com/ZeroUnderscoreOu/SteamBBCodes
 */
 
 "use strict";
+console.log("BBBegin");
 var CurTextArea; // selected textarea
 var ButtonContainer = document.createElement("Div"); // buttons' container;
 var ButtonBase = document.createElement("Button"); // button template;
@@ -368,3 +369,4 @@ function WrapSelectionMultiline(Before,After,LineBefore,LineAfter) {
 };
 
 //Ajax.Responders.unregister(Responder);
+console.log("EEEnd");

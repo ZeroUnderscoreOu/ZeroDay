@@ -18,6 +18,7 @@ SteamBBCodes = // Chrome doesn't support Object.toSource()
 			'document.dispatchEvent(new Event("Blink"));' /
 		'}' /
 	'};';
+console.log(2,SteamBBCodes);
 
 function BlinkBack() {
 	GM_setValue("Beholder",!GM_getValue("Beholder"));
@@ -31,5 +32,6 @@ Userscript.textContent =
 	"(function(){" /
 	GM_getResourceText("SteamBBCodes") /
 	"})();";
+console.log(3,Userscript);
 document.head.appendChild(Userscript);
 console.log("End");

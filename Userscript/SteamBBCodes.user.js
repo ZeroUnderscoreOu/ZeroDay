@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        Steam BBCodes
+// @name        Steam BBCodes ZeroDay
 // @author      ZeroUnderscoreOu
 // @version     1.3.0
 // @icon        https://raw.githubusercontent.com/ZeroUnderscoreOu/SteamBBCodes/master/Logo128.png

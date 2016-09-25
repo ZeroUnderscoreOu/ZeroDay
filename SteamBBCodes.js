@@ -130,7 +130,7 @@ var TextArea = document.body.getElementsByTagName("TextArea");
 		ButtonStyle.textContent =
 			".BBCodeContainer {Position: Relative; Float: Left;}"
 			+ "Button.BBCodeButton {Margin-Right: 4px;}"
-			+ "Button.BBCodeButton .ico16 {Vertical-Align: Middle; Background-Image: URL(https://raw.githubusercontent.com/ZeroUnderscoreOu/SteamBBCodes/master/BackgroundIcons.png);}";
+			+ "Button.BBCodeButton .ico16 {Vertical-Align: Middle; Display: Inline-Block; Background-Image: URL(https://raw.githubusercontent.com/ZeroUnderscoreOu/SteamBBCodes/master/BackgroundIcons.png);}";
 		document.head.appendChild(ButtonStyle);
 		TextAreaInitialization(TextArea);
 		InsertionInitialization();

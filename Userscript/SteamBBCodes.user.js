@@ -18,8 +18,3 @@
 // @require     https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/Beholder.js
 // @resource    SteamBBCodes https://raw.githubusercontent.com/ZeroUnderscoreOu/ZeroDay/master/SteamBBCodes.js
 // ==/UserScript==
-
-var Userscript = document.createElement("Script");
-Userscript.type = "Text/JavaScript";
-Userscript.textContent = GM_getResourceText("SteamBBCodes");
-document.head.appendChild(Userscript);

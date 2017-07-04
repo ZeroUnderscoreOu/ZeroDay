@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Steam Sticker Clicker
 // @author      ZeroUnderscoreOu
-// @version     1.0.0-beta
+// @version     1.0.0-beta-2
 // @icon        
 // @description 
 // @namespace   https://github.com/ZeroUnderscoreOu/
@@ -107,36 +107,3 @@ function FillPage(Page) {
 		}
 	});
 };
-
-
-
-/// ^ update
-function CompleteTask() {
-	var Address = Links[0];
-	if (!Address) {
-		console.log("Completed");
-		return;
-	};
-	fetch(Address,{credentials:"include"})
-		.then((Data)=>(Data.text()))
-		.then((Data)=>{
-			let NewPack = Data.includes("NewStickerPackModal()");
-			console.log("Stick",NewPack,Address);
-			if (NewPack) {
-				CompleteTask(Address);
-			} else {
-				CompleteTask(Links.shift());
-			};
-		})
-		.catch((Error)=>{console.error(Error)});
-};
-
-
-
-document.querySelectorAll("#tasks_remaining_container Div.task")
-
-https://steamcommunity.com/id/ZeroUnderscoreOu/stickersopen/
-
-Add to your wishlist http://steamcommunity.com/my/wishlist
-Mark something Not Interested
-Follow a Curator

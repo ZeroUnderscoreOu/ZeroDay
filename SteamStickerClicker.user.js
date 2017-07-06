@@ -1,60 +1,115 @@
 // ==UserScript==
 // @name        Steam Sticker Clicker
 // @author      ZeroUnderscoreOu
-// @version     1.0.0-beta-2
+// @version     1.1.0-beta
 // @icon        
 // @description 
 // @namespace   https://github.com/ZeroUnderscoreOu/
-// @match       *://steamcommunity.com/*/stickers
+// @match       *://steamcommunity.com/id/*/stickers*
+// @match       *://steamcommunity.com/profiles/*/stickers*
+// @connect     steamcommunity.com
+// @connect     store.steampowered.com
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
-var Links = [
-	"http://steamcommunity.com/my/edit",
-	"http://steamcommunity.com/my/friends",
-	"http://steamcommunity.com/my/home",
-	"http://steamcommunity.com/my/screenshots",
-	//"http://steamcommunity.com/?subsection=broadcasts",
-	"http://steamcommunity.com/apps/allcontenthome?browsefilter=trend&appHubSubSection=13",
-	"http://store.steampowered.com/tag/browse",
-	"http://store.steampowered.com/videos",
-	"http://store.steampowered.com/explore"
+"use strict";
+var Tasks = [
+	{
+		Name: "Profile",
+		URL: "http://steamcommunity.com/my/edit"
+	},
+	{
+		Name: "Activity",
+		URL: "http://steamcommunity.com/my/home"
+	},
+	{
+		Name: "Screenshots",
+		URL: "http://steamcommunity.com/my/screenshots"
+	},
+	{
+		Name: "Broadcasts",
+		URL: "http://steamcommunity.com/apps/allcontenthome?browsefilter=trend&appHubSubSection=13"
+	},
+	{
+		Name: "Tags",
+		URL: "http://store.steampowered.com/tag/browse"
+	},
+	{
+		Name: "Videos",
+		URL: "http://store.steampowered.com/videos"
+	},
+	{
+		Name: "Queue",
+		URL: "http://store.steampowered.com/explore"
+	},
+	{
+		Name: "Preferences",
+		URL: "http://store.steampowered.com/explore/discoveryqueuesettings/"
+	}
 ];
-var CompleteURL = document.location.href.split("/stickers")[0] + "/stickerscomplete/"
+var ProfileURL = window.eval("g_strProfileURL");
+var SessionId = window.eval("g_sessionID");
 var Container = document.querySelector("Div.sticker_button_container");
 var Button = document.createElement("A");
 Button.className = "btn_darkblue_white_innerfade btn_medium";
 Button.style.display = "Inline-Block";
-Button.addEventListener("click",CompleteTask);
-Button.appendChild(document.createElement("Span")).textContent = "Click!!1";
+Button.addEventListener("click",GetFriend);
+Button = Button.appendChild(document.createElement("Span"));
+Button.style["min-width"] = "120px";
+Button.style["text-align"] = "Center";
+Button.textContent = "Stick";
 Container.insertBefore(new Text(" "),Container.firstChild);
-Container.insertBefore(Button,Container.firstChild);
+Container.insertBefore(Button.parentElement,Container.firstChild);
+
+function XHRError(Message,Data) {
+	console.error("SSC - %s\r\n%o",Message,Data);
+};
+
+function GetFriend() {
+	GM_xmlhttpRequest({
+		method: "Get",
+		url: "http://steamcommunity.com/my/friends",
+		timeout: 30 * 1000,
+		onload: function(Data) {
+			let SteamId = Data.responseText.match(/data-steamid="(\d+)"/);
+			if (SteamId) {
+				SteamId = "http://steamcommunity.com/profiles/" + SteamId[1];
+				Tasks.push({
+					Name: "Friend",
+					URL: SteamId
+				});
+				console.log("SSC - friend",SteamId);
+				CompleteTask();
+			} else {
+				console.log("SSC - no friends(");
+			};
+		},
+		onerror: XHRError.bind(this,"friend error"),
+		ontimeout: XHRError.bind(this,"friend timeout")
+	});
+};
 
 function CompleteTask() {
-	var Address = Links[0];
-	if (!Address) {
+	var Task = Tasks[0];
+	if (!Task) {
 		console.log("SSC - tasks completed");
 		OpenPack();
 		return;
 	};
 	GM_xmlhttpRequest({
 		method: "Get",
-		url: Address,
+		url: Task.URL,
 		timeout: 30 * 1000,
 		onload: function(Data) {
 			let NewPack = Data.responseText.includes("NewStickerPackModal()");
-			console.log("SSC - tasks",NewPack,Address);
+			Button.textContent = Task.Name;
 			if (!NewPack) {
-				Links.shift();
+				Tasks.shift();
 			};
 			setTimeout(CompleteTask,1000);
 		},
-		onerror: function(Data) {
-			console.error("SSC - task error",Data);
-		},
-		ontimeout: function(Data) {
-			console.error("SSC - task timeout",Data);
-		}
+		onerror: XHRError.bind(this,"task error"),
+		ontimeout: XHRError.bind(this,"task timeout")
 	});
 };
 
@@ -64,8 +119,8 @@ function OpenPack() {
 		url: "http://steamcommunity.com/my/stickersopen/",
 		timeout: 10 * 1000,
 		onload: function(Data) {
-			let Packs = parseInt(Data.responseText.match(/"stickerpacks":(\w+)/)[1]);
-			console.log("SSC - packs",Packs);
+			let Packs = JSON.parse(Data.responseText).stickerpacks;
+			Button.textContent = "Packs " + Packs.toString(10);
 			if (Packs>0) {
 				setTimeout(OpenPack,500);
 			} else {
@@ -73,37 +128,30 @@ function OpenPack() {
 				FillPage(14);
 			};
 		},
-		onerror: function(Data) {
-			console.error("SSC - pack error",Data);
-		},
-		ontimeout: function(Data) {
-			console.error("SSC - pack timeout",Data);
-		}
+		onerror: XHRError.bind(this,"pack error"),
+		ontimeout: XHRError.bind(this,"pack timeout")
 	});
 };
 
 function FillPage(Page) {
 	if (Page<0) {
 		console.log("SSC - pages filled");
+		Button.textContent = "Done";
 		return;
 	};
 	GM_xmlhttpRequest({
 		method: "Post",
-		url: CompleteURL,
+		url: ProfileURL + "/stickerscomplete/",
 		data: "scene=" + Page.toString(10),
 		headers: {
-			"Content-Type": "application/x-www-form-urlencoded"
+			"Content-Type": "Application/X-WWW-Form-URLEncoded"
 		},
 		timeout: 10 * 1000,
 		onload: function(Data) {
-			console.log("SSC - page",Page);
+			Button.textContent = "Page " + Page.toString(10);
 			setTimeout(FillPage,1000,--Page);
 		},
-		onerror: function(Data) {
-			console.error("SSC - page error",Data);
-		},
-		ontimeout: function(Data) {
-			console.error("SSC - page timeout",Data);
-		}
+		onerror: XHRError.bind(this,"page error"),
+		ontimeout: XHRError.bind(this,"page timeout")
 	});
 };

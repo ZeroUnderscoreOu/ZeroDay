@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Steam Activity Recorder
 // @author      ZeroUnderscoreOu
-// @version     1.0.0
+// @version     1.1.0
 // @icon        
 // @description 
 // @namespace   https://github.com/ZeroUnderscoreOu/
@@ -17,6 +17,7 @@ switch (true) {
 		InitializeHome();
 		break;
 	case document.location.pathname.includes("/friends"):
+		var FilterState = 0;
 		InitializeFriends();
 		break;
 };
@@ -32,7 +33,7 @@ function InitializeHome() {
 	Button = Div.appendChild(Button.cloneNode(true));
 	Button.firstElementChild.textContent = "Record";
 	Button.addEventListener("click",Record);
-	Button = Div.appendChild(Button.cloneNode(true))
+	Button = Div.appendChild(Button.cloneNode(true));
 	Button.firstElementChild.textContent = "Erase";
 	Button.addEventListener("click",Erase);
 	Div = Div.insertBefore(document.createElement("Div"),Div.firstElementChild);
@@ -42,12 +43,17 @@ function InitializeHome() {
 };
 
 function InitializeFriends() {
+	var Manager = document.querySelector("Div.manage_actions_buttons");
 	var Button = document.createElement("Span");
+	var Style = document.createElement("Style");
 	Button.className = "btnv6_lightblue_blue btn_medium";
 	Button.appendChild(document.createElement("Span")).textContent = "Activity stats";
 	Button.addEventListener("click",Display);
-	document.querySelector("Div.manage_actions_buttons").appendChild(Button);
-	document.getElementById("manage_friends_btn").addEventListener("click",ManageClick);
+	Manager.appendChild(Button);
+	//document.getElementById("manage_friends_btn").addEventListener("click",Clear);
+	//Manager.querySelector("Span[onclick='ToggleManageFriends()']").addEventListener("click",Clear);
+	Style.id = "SARStyle";
+	document.head.appendChild(Style);
 };
 
 function Record() {
@@ -58,14 +64,14 @@ function Record() {
 			Events: []
 		};
 	Array.from(document.querySelectorAll("Div.blotter_block")).forEach((Event)=>{
-		let Link = Event.querySelector("A[data-miniprofile]"); // event author profile link & Id
-		let EventId = Event.querySelector("A[Id^='vote_up']"); // rate up button with event Id; players only
+		let Link = Event.querySelector("[data-miniprofile]"); // event author profile link & Id; not always A
+		let EventId = Event.querySelector("A[id^='vote_up'], A[id^='RecommendationVoteUp']"); // rate up button with event Id; players only
 		if (Link&&EventId) {
 			let AuthorId = Link.getAttribute("data-miniprofile");
 			EventId = EventId.getAttribute("onclick");
 			switch (true) {
 				case EventId.includes("VoteUp("):
-					EventId = EventId.match(/\((\d+)\)/)[1];
+					EventId = EventId.match(/\d+/)[0];
 					break;
 				case EventId.includes("VoteUpCommentThread("):
 					EventId = EventId.split("_")[2];
@@ -79,7 +85,7 @@ function Record() {
 				SARData[AuthorId] ? SARData[AuthorId]++ : SARData[AuthorId] = 1; // and count it
 			};
 		};
-	});	
+	});
 	localStorage.setItem("SteamActivityRecorder",JSON.stringify(SARData));
 };
 
@@ -100,11 +106,38 @@ function Display() {
 			Span.className = "SARData"; // for easier searching
 			Span.appendChild(document.createElement("Sup")).textContent = ` [${SARData[Key]}]`;
 			Br.parentElement.insertBefore(Span,Br);
+			Br.parentElement.parentElement.classList.add("SARActive"); // for easier searching
 		};
 	});
+	this.firstElementChild.textContent = "Show inactive";
+	this.removeEventListener("click",Display);
+	this.addEventListener("click",Filter);
 };
 
-function ManageClick() { // clearing displayed data
+function Filter() {
+	var Style = document.getElementById("SARStyle");
+	switch (FilterState) {
+		case 0: // inactive
+			this.firstElementChild.textContent = "Show active";
+			Style.textContent = "Div.friendBlock.SARActive {Display: None;} Div.friendBlock:not(SARActive) {Display: Initial;}";
+			FilterState++;
+			break;
+		case 1: // active
+			this.firstElementChild.textContent = "Show all";
+			Style.textContent = "Div.friendBlock.SARActive {Display: Initial;} Div.friendBlock:not(SARActive) {Display: None;}";
+			FilterState++;
+			break;
+		case 2: // all
+		default:
+			this.firstElementChild.textContent = "Show inactive";
+			Style.textContent = "Div.friendBlock.SARActive {Display: Initial;} Div.friendBlock:not(SARActive) {Display: Initial;}";
+			FilterState = 0;
+			break;
+	};
+	Array.from(document.querySelectorAll("Div.friendBlock.SARActive"));
+};
+
+function Clear() { // clearing displayed data
 	Array.from(document.querySelectorAll("Span.SARData")).forEach((Span)=>{
 		Span.parentElement.removeChild(Span);
 	});

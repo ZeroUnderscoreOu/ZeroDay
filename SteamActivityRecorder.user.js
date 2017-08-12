@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Steam Activity Recorder
 // @author      ZeroUnderscoreOu
-// @version     1.2.0
+// @version     1.2.1
 // @icon        
 // @description 
 // @namespace   https://github.com/ZeroUnderscoreOu/
@@ -16,9 +16,12 @@
 var FilterState = 0; // friends filter
 var Responder = {
 	onComplete: (AjaxData,XHRData) => {
-		// XHRData.responseText // proper way would be to store response as I see it anyway and then parse it if needed, but I'm too lazy to code it ATM
 		if (AjaxData.url.includes("?friends=1")) { // list of friends in group
+			// XHRData.responseText // proper way would be to store response as I see it anyway and then parse it if needed, but I'm too lazy to code it ATM
 			InitializeGroups();
+		};
+		if (AjaxData.url.includes("?start=")) {
+			RecordActivity();
 		};
 	}
 };
@@ -33,7 +36,8 @@ SARData
 
 switch (true) {
 	case document.location.pathname.includes("/home"):
-		InitializeHome();
+		Ajax.Responders.register(Responder);
+		RecordActivity();
 		break;
 	case document.location.pathname.includes("/groups"):
 		Ajax.Responders.register(Responder);
@@ -43,7 +47,7 @@ switch (true) {
 		break;
 };
 
-function InitializeHome() {
+function InitializeHome() { // unused now
 	var LaunchArea = document.querySelector("Div.friends_launch_area");
 	var Div = document.createElement("Div");
 	var Button = document.createElement("Div");
@@ -78,10 +82,13 @@ function InitializeGroups() {
 function InitializeFriends() {
 	var Manager = document.querySelector("Div.manage_actions_buttons");
 	var Button = document.createElement("Span");
-	Button.className = "btnv6_lightblue_blue btn_medium";
-	Button.appendChild(document.createElement("Span")).textContent = "Activity stats";
-	Button.addEventListener("click",Display);
 	Manager.appendChild(Button);
+	Button.className = "btnv6_lightblue_blue btn_medium";
+	Button.appendChild(document.createElement("Span")).textContent = "Show stats";
+	Button.addEventListener("click",ShowActivity);
+	Button = Manager.appendChild(Button.cloneNode(true));
+	Button.firstElementChild.textContent = "Erase stats";
+	Button.addEventListener("click",EraseActivity);
 	//document.getElementById("manage_friends_btn").addEventListener("click",Clear);
 	//Manager.querySelector("Span[onclick='ToggleManageFriends()']").addEventListener("click",Clear);
 	document.head.appendChild(document.createElement("Style")).id = "SARFilter";
@@ -147,7 +154,7 @@ function EraseGroup() {
 	localStorage.setItem("SteamActivityRecorder",JSON.stringify(SARData));
 };
 
-function Display() {
+function ShowActivity() {
 	Object.keys(SARData.Friends).forEach((Friend)=>{
 		let Selector = `Div[data-miniprofile='${Friend}'] Br`;
 		let Br = document.querySelector(Selector);
@@ -172,7 +179,7 @@ function Display() {
 		});
 	});
 	this.firstElementChild.textContent = "Show inactive";
-	this.removeEventListener("click",Display);
+	this.removeEventListener("click",ShowActivity);
 	this.addEventListener("click",Filter);
 };
 

@@ -1,0 +1,46 @@
+<HTML>
+<Head>
+	<Meta Charset="UTF-8">
+	<Style>
+		Body {
+			Margin: 10% 20% 10% 20%;
+		}
+		#InputURL {
+			Width: 60%;
+			Margin: 1% 20% 1% 20%;
+		}
+		#ButtonCheck {
+			Width: 20%;
+			Margin: 1% 40% 1% 40%;
+		}
+		#TextAreaLog {
+			Width: 60%;
+			Height: 40%;
+			Margin: 1% 20% 1% 20%;
+			Border: 1px Solid Black;
+		}
+		Input {
+			Border: 1px Solid Black;
+		}
+	</Style>
+	<Script>
+		function CORSCheck() {
+			var Link = document.getElementById("InputURL").value;
+			fetch(Link).then(CORSLog).catch(CORSLog);
+		};
+		function CORSLog(Data) {
+			var Log = document.getElementById("TextAreaLog");
+			Log.style.display = "Block";
+			Log.value = Data;
+		};
+	</Script>
+</Head>
+<Body>
+	<Input ID="InputURL" Type="Text" Placeholder="URL">
+	<TextArea ID="TextAreaLog" Placeholder="Log"></TextArea>
+	<Input ID="ButtonCheck" Type="Button" Value="Check CORS">
+	<Script>
+		document.getElementById("ButtonCheck").addEventListener("click",CORSCheck);
+	</Script>
+</Body>
+</HTML>

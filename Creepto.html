@@ -1,16 +1,3 @@
-<!--
-t.CONDITIONS = [
-    {name: 'Fast',      indexes: [0],     readable: '1m'},
-    {name: 'Swift',     indexes: [1,2],   readable: '2m - 5m'},
-    {name: 'Snappy',    indexes: [3,4],   readable: '10m - 30m'},
-    {name: 'Brisk',     indexes: [5,6],   readable: '1h - 2h'},
-    {name: 'Plodding',  indexes: [7,8],   readable: '4h - 8h'},
-    {name: 'Slow',      indexes: [9,10],  readable: '16h - 24h'},
-    {name: 'Sluggish',  indexes: [11,12], readable: '2d - 4d'},
-    {name: 'Catatonic', indexes: [13],    readable: '1 week'}
-]
--->
-
 <HTML>
 <Head>
 	<Meta Charset=UTF-8>
@@ -30,54 +17,92 @@ t.CONDITIONS = [
 			Border: 1px Solid Black;
 			Padding: 10px;
 		}
-		Input[Type=Button] {
+		Form {
+			Margin: 25px 0px 25px 0px;
+		}
+		Input[Type=Text] {
+			Width: 200px;
+			Margin: 0px 10px 0px 10px;
+		}
+		Input[Type=Submit] {
 			Width: 100px;
 			Height: 25px;
-			Margin-Left: 0px;
-			Margin-Top: 25px;
-			Margin-Bottom: 25px;
 		}
 	</Style>
 	<Script>
 		"use stict";
 
-		function Load() {
-			var Link = `https://api.cryptokitties.co/auctions?offset=${Offset}&limit=100&type=sale&status=open&sorting=cheap&orderBy=current_price&orderDirection=asc`;
+		var Link = new URL("https://api.cryptokitties.co/auctions");
+		var LinkKitty = "https://www.cryptokitties.co/kitty/";
+		var Speed = ["Fast","Swift","Swift","Snappy","Snappy","Brisk","Brisk","Plodding","Plodding","Slow","Slow","Sluggish","Sluggish","Catatonic"];
+		var Ether = 1000000000000000000;
+		var Offset = 0;
+		Link.searchParams.set("limit",100);
+		Link.searchParams.set("type","sale");
+		Link.searchParams.set("status","open");
+		Link.searchParams.set("sorting","cheap");
+		Link.searchParams.set("orderBy","current_price");
+		Link.searchParams.set("orderDirection","asc");
+		//https://api.cryptokitties.co/kitties/93863
+
+		function SearchUpdate() {
+			ButtonLoad.disabled = false; // enabling the button if it was locked
+			ButtonLoad.value = "Load";
+			TextSearch.removeEventListener("input",SearchUpdate);
+		};
+
+		function LoadKitties(Event) {
+			Event.preventDefault();
+			if (TextSearch.value.length>0) {
+				if (Link.searchParams.get("search")!=TextSearch.value) { // resetting
+					Offset = 0;
+					Array.from(Table.rows).forEach((Row)=>{Row.remove();});
+					Link.searchParams.set("search",TextSearch.value);
+				};
+			} else {
+				Link.searchParams.delete("search");
+			};
+			Link.searchParams.set("offset",Offset);
 			fetch(Link).then((Data)=>(Data.json())).then((Data)=>{
-				Data.auctions = Data.auctions.filter((Cat)=>(Cat.kitty.status.cooldown_index<9));
+				let Fragment = new DocumentFragment();
 				Data.auctions.forEach((Cat)=>{
+					if (Cat.kitty.status.cooldown_index>8) { // too slow
+						return;
+					};
 					let Row = document.createElement("TR");
 					let A = document.createElement("A");
-					A.href = `${Base}${Cat.kitty.id}`;
+					A.href = `${LinkKitty}${Cat.kitty.id}`;
 					A.textContent = `${Cat.kitty.name}`
 					Row.append(document.createElement("TD"),document.createElement("TD"),document.createElement("TD"));
 					Row = Row.childNodes;
 					Row[0].appendChild(document.createElement("Img")).src = Cat.kitty.image_url;
-					Row[1].append(`G${Cat.kitty.generation} S${Cat.kitty.status.cooldown_index} `,A);
-					Row[2].textContent = `${(parseFloat(Cat.current_price)/Ether).toFixed(8)}`; // I'm too lazy to dig into CK's code; that's how I understant their convertion of JSON data
-					Table.append(Row[0].parentElement);
-					Offset += 100;
-					if (Offset>=Data.total) {
-						Loader.disabled = true;
-						Loader.value = "That's all";
-					};
+					Row[1].append(`G${Cat.kitty.generation} ${Speed[Cat.kitty.status.cooldown_index]} `,A);
+					Row[2].textContent = `${(parseFloat(Cat.current_price)/Ether).toFixed(8)}`; // I'm too lazy to dig into CK's code; that's how I understand their convertion of JSON data
+					Fragment.append(Row[0].parentElement);
 				});
+				Table.append(Fragment);
+				Offset += 100;
+				if (Offset>=Data.total) { // reached the end of the list
+					ButtonLoad.disabled = true;
+					ButtonLoad.value = "That's all";
+					TextSearch.addEventListener("input",SearchUpdate);
+				};
 			});
 		};
 	</Script>
 </Head>
 <Body>
 	<Table Id=List></Table>
-	<Input Id=Loader Type=Button Value=Load>
+	<Form Id=KittieSearch>
+		<Input Id=TextSearch Type=Text Placeholder=Search>
+		<Input Id=ButtonLoad Type=Submit Value=Load>
+	<Form>
 	<Script>
-		"use stict";
-		
-		var Base = "https://www.cryptokitties.co/kitty/";
-		var Ether = 1000000000000000000;
-		var Offset = 0;
 		var Table = document.getElementById("List");
-		var Loader = document.getElementById("Loader")
-		Loader.addEventListener("click",Load);
+		var KittieSearch = document.getElementById("KittieSearch");
+		var TextSearch = document.getElementById("TextSearch");
+		var ButtonLoad = document.getElementById("ButtonLoad");
+		KittieSearch.addEventListener("submit",LoadKitties);
 	</Script>
 </Body>
 </HTML>

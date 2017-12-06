@@ -1,0 +1,83 @@
+<!--
+t.CONDITIONS = [
+    {name: 'Fast',      indexes: [0],     readable: '1m'},
+    {name: 'Swift',     indexes: [1,2],   readable: '2m - 5m'},
+    {name: 'Snappy',    indexes: [3,4],   readable: '10m - 30m'},
+    {name: 'Brisk',     indexes: [5,6],   readable: '1h - 2h'},
+    {name: 'Plodding',  indexes: [7,8],   readable: '4h - 8h'},
+    {name: 'Slow',      indexes: [9,10],  readable: '16h - 24h'},
+    {name: 'Sluggish',  indexes: [11,12], readable: '2d - 4d'},
+    {name: 'Catatonic', indexes: [13],    readable: '1 week'}
+]
+-->
+
+<HTML>
+<Head>
+	<Meta Charset=UTF-8>
+	<Style>
+		Body {
+			Width: 70%;
+			Margin-Left: 15%;
+		}
+		Img {
+			Width: 200px;
+			Height: 200px;
+		}
+		Table {
+			Border-Collapse: Collapse;
+		}
+		TD {
+			Border: 1px Solid Black;
+			Padding: 10px;
+		}
+		Input[Type=Button] {
+			Width: 100px;
+			Height: 25px;
+			Margin-Left: 0px;
+			Margin-Top: 25px;
+			Margin-Bottom: 25px;
+		}
+	</Style>
+	<Script>
+		"use stict";
+
+		function Load() {
+			var Link = `https://api.cryptokitties.co/auctions?offset=${Offset}&limit=100&type=sale&status=open&sorting=cheap&orderBy=current_price&orderDirection=asc`;
+			fetch(Link).then((Data)=>(Data.json())).then((Data)=>{
+				Data.auctions = Data.auctions.filter((Cat)=>(Cat.kitty.status.cooldown_index<9));
+				Data.auctions.forEach((Cat)=>{
+					let Row = document.createElement("TR");
+					let A = document.createElement("A");
+					A.href = `${Base}${Cat.kitty.id}`;
+					A.textContent = `${Cat.kitty.name}`
+					Row.append(document.createElement("TD"),document.createElement("TD"),document.createElement("TD"));
+					Row = Row.childNodes;
+					Row[0].appendChild(document.createElement("Img")).src = Cat.kitty.image_url;
+					Row[1].append(`G${Cat.kitty.generation} S${Cat.kitty.status.cooldown_index} `,A);
+					Row[2].textContent = `${(parseFloat(Cat.current_price)/Ether).toFixed(8)}`; // I'm too lazy to dig into CK's code; that's how I understant their convertion of JSON data
+					Table.append(Row[0].parentElement);
+					Offset += 100;
+					if (Offset>=Data.total) {
+						Loader.disabled = true;
+						Loader.value = "That's all";
+					};
+				});
+			});
+		};
+	</Script>
+</Head>
+<Body>
+	<Table Id=List></Table>
+	<Input Id=Loader Type=Button Value=Load>
+	<Script>
+		"use stict";
+		
+		var Base = "https://www.cryptokitties.co/kitty/";
+		var Ether = 1000000000000000000;
+		var Offset = 0;
+		var Table = document.getElementById("List");
+		var Loader = document.getElementById("Loader")
+		Loader.addEventListener("click",Load);
+	</Script>
+</Body>
+</HTML>

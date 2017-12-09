@@ -20,13 +20,21 @@
 		Form {
 			Margin: 25px 0px 25px 0px;
 		}
+		Input, Select {
+			Margin: 0px 10px 0px 0px;
+			Border: 1px Solid Black;
+		}
 		Input[Type=Text] {
 			Width: 200px;
-			Margin: 0px 10px 0px 10px;
+			Height: 19px;
+			Margin-Left: 10px;
 		}
-		Input[Type=Submit] {
+		Input[Type=Submit], Input[Type=Button] {
 			Width: 100px;
-			Height: 25px;
+			Height: 19px;
+		}
+		Select {
+			Vertical-Align: Top;
 		}
 	</Style>
 	<Script>
@@ -37,22 +45,20 @@
 		var Speed = ["Fast","Swift","Swift","Snappy","Snappy","Brisk","Brisk","Plodding","Plodding","Slow","Slow","Sluggish","Sluggish","Catatonic"];
 		var Ether = 1000000000000000000;
 		var Offset = 0;
-		Link.searchParams.set("limit",100);
+		Link.searchParams.set("limit",20); // currently forced by CK
 		Link.searchParams.set("type","sale");
 		Link.searchParams.set("status","open");
-		Link.searchParams.set("sorting","cheap");
-		Link.searchParams.set("orderBy","current_price");
-		Link.searchParams.set("orderDirection","asc");
-		//https://api.cryptokitties.co/kitties/93863
+		Link.searchParams.set("parents",false);
 
 		function SearchUpdate() {
-			ButtonLoad.disabled = false; // enabling the button if it was locked
-			ButtonLoad.value = "Load";
+			ButtonSearch.disabled = false; // enabling the button if it was locked
+			ButtonSearch.value = "Search";
 			TextSearch.removeEventListener("input",SearchUpdate);
 		};
 
-		function LoadKitties(Event) {
+		function SearchKitties(Event) {
 			Event.preventDefault();
+			let SpeedFilter = Array.from(SelectSpeed.selectedOptions).map((Item)=>(Item.value));
 			if (TextSearch.value.length>0) {
 				if (Link.searchParams.get("search")!=TextSearch.value) { // resetting
 					Offset = 0;
@@ -62,47 +68,110 @@
 			} else {
 				Link.searchParams.delete("search");
 			};
+			switch (SelectSort.value) {
+				case "Cheap":
+					Link.searchParams.set("sorting","cheap");
+					Link.searchParams.set("orderBy","current_price");
+					Link.searchParams.set("orderDirection","asc");
+					break;
+				case "Expensive":
+					Link.searchParams.set("sorting","expensive");
+					Link.searchParams.set("orderBy","current_price");
+					Link.searchParams.set("orderDirection","desc");
+					break;
+				case "Young":
+					Link.searchParams.delete("sorting");
+					Link.searchParams.delete("orderBy");
+					Link.searchParams.delete("orderDirection");
+					break;
+				case "Old":
+					Link.searchParams.set("sorting","old-first");
+					Link.searchParams.delete("orderBy");
+					Link.searchParams.set("orderDirection","asc");
+					break;
+			};
 			Link.searchParams.set("offset",Offset);
 			fetch(Link).then((Data)=>(Data.json())).then((Data)=>{
 				let Fragment = new DocumentFragment();
 				Data.auctions.forEach((Cat)=>{
-					if (Cat.kitty.status.cooldown_index>8) { // too slow
+					let KittySpeed = Speed[Cat.kitty.status.cooldown_index];
+					if (!SpeedFilter.includes(KittySpeed)) { // too slow
 						return;
 					};
 					let Row = document.createElement("TR");
 					let A = document.createElement("A");
+					Row.id = Cat.kitty.id;
 					A.href = `${LinkKitty}${Cat.kitty.id}`;
-					A.textContent = `${Cat.kitty.name}`
+					//A.textContent = `${Cat.kitty.name}`;
 					Row.append(document.createElement("TD"),document.createElement("TD"),document.createElement("TD"));
 					Row = Row.childNodes;
-					Row[0].appendChild(document.createElement("Img")).src = Cat.kitty.image_url;
-					Row[1].append(`G${Cat.kitty.generation} ${Speed[Cat.kitty.status.cooldown_index]} `,A);
+					//Row[0].appendChild(document.createElement("Img")).src = Cat.kitty.image_url;
+					Row[0].appendChild(A).appendChild(document.createElement("Img")).src = Cat.kitty.image_url;
+					Row[1].append(`${Cat.kitty.generation} ${KittySpeed}`);
 					Row[2].textContent = `${(parseFloat(Cat.current_price)/Ether).toFixed(8)}`; // I'm too lazy to dig into CK's code; that's how I understand their convertion of JSON data
 					Fragment.append(Row[0].parentElement);
 				});
 				Table.append(Fragment);
 				Offset += 100;
 				if (Offset>=Data.total) { // reached the end of the list
-					ButtonLoad.disabled = true;
-					ButtonLoad.value = "That's all";
+					ButtonSearch.disabled = true;
+					ButtonSearch.value = "That's all";
 					TextSearch.addEventListener("input",SearchUpdate);
 				};
-			});
+			}).catch((Message)=>{console.error("Search error",Message);});
+		};
+		
+		function TraitKitties() {
+			let Kitties = Array.from(document.getElementsByTagName("TR")).map((Row)=>(Row.id));
+			LoadKitties(Kitties,Kitties.length);
+		};
+		
+		function LoadKitties(Kitties,Length) {
+			let Id = Kitties.pop();
+			if (!Id) {
+				return;
+			};
+			fetch("https://api.cryptokitties.co/kitties/"+Id).then((Data)=>(Data.json())).then((Data)=>{
+				let Attributes = Data.cattributes.map((Attribute)=>(Attribute.description));
+				let Pre = document.createElement("Pre");
+				Pre.textContent = Attributes.join("\r\n");
+				document.getElementById(Id).childNodes[1].appendChild(Pre);
+				setTimeout(LoadKitties,500,Kitties,Kitties.length); // timeout to revent overload
+			}).catch((Message)=>{console.error("Trait error",Message);});
 		};
 	</Script>
 </Head>
 <Body>
-	<Table Id=List></Table>
-	<Form Id=KittieSearch>
-		<Input Id=TextSearch Type=Text Placeholder=Search>
-		<Input Id=ButtonLoad Type=Submit Value=Load>
-	<Form>
-	<Script>
+	<Table Id="List"></Table>
+	<Form Id="FormFilter">
+		<Input Id="TextSearch" Type="Text" Placeholder="Search">
+		<Select Id="SelectSpeed" Multiple="True" Size="8">
+			<Option Value="Fast" Selected="True">Fast</Option>
+			<Option Value="Swift" Selected="True">Swift</Option>
+			<Option Value="Snappy" Selected="True">Snappy</Option>
+			<Option Value="Brisk" Selected="True">Brisk</Option>
+			<Option Value="Plodding" Selected="True">Plodding</Option>
+			<Option Value="Slow">Slow</Option>
+			<Option Value="Sluggish">Sluggish</Option>
+			<Option Value="Catatonic">Catatonic</Option>
+		</Select>
+		<Select Id="SelectSort" Size="4">
+			<Option Value="Cheap" Selected="True">Cheap</Option>
+			<Option Value="Expensive">Expensive</Option>
+			<Option Value="Young">Young</Option>
+			<Option Value="Old">Old</Option>
+		</Select>
+		<Input Id="ButtonSearch" Type="Submit" Value="Search">
+		<Input Id="ButtonTraits" Type="Button" Value="Traits">
+	</Form>
+	<Script> // initiating after elements are created
 		var Table = document.getElementById("List");
-		var KittieSearch = document.getElementById("KittieSearch");
 		var TextSearch = document.getElementById("TextSearch");
-		var ButtonLoad = document.getElementById("ButtonLoad");
-		KittieSearch.addEventListener("submit",LoadKitties);
+		var SelectSpeed = document.getElementById("SelectSpeed");
+		var SelectSort = document.getElementById("SelectSort");
+		var ButtonSearch = document.getElementById("ButtonSearch");
+		document.getElementById("FormFilter").addEventListener("submit",SearchKitties);
+		document.getElementById("ButtonTraits").addEventListener("click",TraitKitties);
 	</Script>
 </Body>
 </HTML>

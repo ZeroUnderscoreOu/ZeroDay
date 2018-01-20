@@ -1,0 +1,214 @@
+Body {
+	Margin: 10px;
+	Font-Family: Sans-Serif;
+	Font-Size: 16px;
+}
+Input,
+Select {
+	Width: 100px;
+	Border: 1px Solid Black;
+	Padding: 1px;
+}
+Input {
+	Height: 21px;
+}
+Label {
+	Color: Gray;
+	Font-Size: 10px;
+	Line-Height: 1em;
+}
+Img {
+	Width: 200px;
+	Height: 200px;
+}
+P {
+	Margin: 0px;
+}
+A,
+B {
+	Color: #FF8000;
+}
+
+/* List */
+
+#List {
+	Display: Inline-Flex;
+	Margin: 0px 230px 0px 230px;
+	Flex: None;
+	Flex-Wrap: Wrap;
+	Justify-Content: Space-Evenly;
+	Align-Content: Start;
+	Align-Items: Start;
+}
+Div.Kitty {
+	Display: Inline-Block;
+	Position: Relative; /* for positioning of child divs */
+}
+Div.Data {
+	Position: Absolute;
+	Top: 170px;
+}
+Div.Data > Div {
+	Display: Inline-Block;
+	Height: 30px;
+	Overflow: Hidden;
+}
+Div.Data > Div::before {
+	Display: Block;
+	Content: Attr(Data-Before);
+	Color: Gray;
+	Font-Size: 10px;
+	Line-Height: 1em;
+}
+Div.Generation {
+	Width: 25px;
+}
+Div.Cooldown {
+	Width: 75px;
+}
+Div.Price {
+	Width: 100px;
+}
+Div.Cattributes {
+	Box-Sizing: Border-Box;
+	Width: 100%;
+	Overflow: Hidden;
+	White-Space: Pre;
+	Column-Count: 2;
+	Column-Gap: 0px;
+	Font-Size: 12px;
+}
+Div.Cattributes > Span {
+	Display: Block;
+}
+
+/* Search form */
+
+#FormSearch {
+	Margin: 10px;
+	Height: calc(100% - 20px); /* minus margin */
+	Position: Fixed;
+	Right: 0px;
+	Top: 0px;
+}
+#TextSearch {
+	Width: 210px;
+	Position: Absolute;
+	Right: 0px;
+	Transition: Width 0.5s;
+	/* not supported by FF ATM
+	Column-Span: All;
+	*/
+}
+#TextSearch:focus {
+	Width: 420px;
+}
+Div.FormControls {
+	Width: 210px; /* for proper size in Chrome */
+	Margin-Top: 31px;
+	Column-Width: 100px;
+	Column-Count: 2;
+	Column-Gap: 10px;
+}
+Div.FormControls > * {
+	Display: Inline-Block;
+	Margin-Bottom: 10px;
+}
+Div.Spacer {
+	Height: 81px;
+}
+
+/* Signature */
+
+Div.Signature {
+	Display: Flex;
+	Flex: None;
+	Flex-Flow: Column Nowrap;
+	Align-Items: Flex-End;
+	/* not supported by Chrome ATM
+	Align-Items: Right;
+	*/
+	Visibility: Hidden; /* preventing hover working on empty space */
+	Position: Absolute;
+	Right: 0px;
+	Bottom: 0px;
+	Overflow: Hidden;
+	Font-Family: Monospace;
+	Font-Size: 16px;
+	Text-Align: Right;
+}
+Div.Signature > P {
+	Opacity: 0;
+	Width: 46ch; /* preventing autosizing */ /* Flex-Basis? */
+	Padding: 10px 0px 10px 10px;
+	Background-Color: White;
+	Line-Height: 1.2em;
+	White-Space: Pre-Line;
+	Transition-Property: All;
+	Transition-Duration: 0.5s;
+}
+Div.Signature:hover > P {
+	Visibility: Visible;
+	Opacity: 1; /* Visibility isn't animated */
+}
+Div.Signature > P > Span {
+	Display: Inline-Block; /* for padding to work */
+	Padding-Bottom: 1em;
+	Font-Size: 0.75em;
+}
+Div.Signature > Span {
+	Visibility: Visible;
+	Color: Gray;
+	Font-Size: 0.75em;
+}
+
+/* Rarity */
+
+Span.Legendary {
+	Color: #C08000;
+}
+Span.Exotic {
+	Color: #8000C0;
+}
+Span.Rare {
+	Color: #0080C0;
+}
+Span.Uncommon {
+	Color: #80C000;
+}
+Span.Common {
+	Color: #808080;
+}
+
+/*
+looks meh, commenting out for now
+element not shown if content property is omitted
+Div.Cattributes > P::before {
+	Display: Inline-Block;
+	Width: 16px;
+	Vertical-Align: Bottom;
+	Background-Position: Center;
+	Background-Size: Contain;
+	Background-Repeat: No-Repeat;
+	Content: "";
+}
+P.body::before,
+P.colorbody::before {
+	Background-Image: URL("https://www.cryptokitties.co/icons/cattribute-body.svg");
+}
+P.eyes::before {
+	Background-Image: URL("https://www.cryptokitties.co/icons/cattribute-eyeshape.svg");
+}
+P.coloreyes::before {
+	Background-Image: URL("https://www.cryptokitties.co/icons/cattribute-eyecolor.svg");
+}
+P.color::before {
+	Background-Image: URL("https://www.cryptokitties.co/icons/cattribute-color.svg");
+}
+P.pattern::before {
+	Background-Image: URL("https://www.cryptokitties.co/icons/cattribute-pattern.svg");
+}
+P.mouth::before {
+	Background-Image: URL("https://www.cryptokitties.co/icons/cattribute-mouth.svg");
+}
+*/

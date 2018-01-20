@@ -1,0 +1,65 @@
+<HTML>
+<Head>
+	<Meta Charset="UTF-8">
+	<Title>CreepToKitties</Title>
+	<Link Rel="Stylesheet" HRef="Style.css">
+	<Script Src="Rarities.js"></Script>
+	<Script Src="Script.js" Defer="True"></Script>
+</Head>
+<Body>
+	<Div Id="List"></Div>
+	<Form Id="FormSearch">
+		<Input Id="TextSearch" Type="Text" Placeholder="Query">
+		<Div Class="FormControls">
+			<Label For="SelectCooldown">
+				<P>Cooldown</P>
+				<Select Id="SelectCooldown" Multiple="True" Size="8">
+					<Option Value="fast" Selected="True">Fast</Option>
+					<Option Value="swift" Selected="True">Swift</Option>
+					<Option Value="snappy" Selected="True">Snappy</Option>
+					<Option Value="brisk" Selected="True">Brisk</Option>
+					<Option Value="plodding" Selected="True">Plodding</Option>
+					<Option Value="slow">Slow</Option>
+					<Option Value="sluggish">Sluggish</Option>
+					<Option Value="catatonic">Catatonic</Option>
+				</Select>
+			</Label>
+			<Label For="NumberGeneration">
+				<P>Generation</P>
+				<Input Id="NumberGeneration" Type="Number" Value="-1" Min="-1">
+			</Label>
+			<Label For="SelectType">
+				<P>Type</P>
+				<Select Id="SelectType" Size="3">
+					<Option Value="exclusive">Exclusive</Option>
+					<Option Value="fancy">Fancy</Option>
+					<Option Value="normal">Normal</Option>
+				</Select>
+			</Label>
+			<Label For="SelectSort">
+				<P>Sorting</P>
+				<Select Id="SelectSort" Size="4">
+					<Option Value="Cheap" Selected="True">Cheap</Option>
+					<Option Value="Expensive">Expensive</Option>
+					<Option Value="Young">Young</Option>
+					<Option Value="Old">Old</Option>
+				</Select>
+			</Label>
+			<Div Class="Spacer"></Div><!-- using spacer is kinda lame, but I couldn't come up with another vertical alignment option which also keeps elements in the flow -->
+			<Input Id="ButtonSearch" Type="Submit" Value="Search">
+			<Input Id="ButtonCattributes" Type="Button" Value="Cattributes">
+			<Input Id="ButtonClear" Type="Reset" Value="Clear">
+		</Div>
+		<Div Class="Signature">
+			<P>
+				Rarity stats by <A HRef="http://cryptokittydex.com/">CryptoKittydex</A>
+				
+				Profile on <A HRef="https://github.com/ZeroUnderscoreOu/">GitHub</A>
+				Profile on <A HRef="https://steamcommunity.com/id/ZeroUnderscoreOu/">Steam</A>
+				<B>ETH</B> 0x2c1Aa9CCAdb9dA28A70e361f03111442F9061380
+			</P>
+			<Span>CreepToKitties by <B>ZeroUnderscoreOu</B></Span>
+		</Div>
+	</Form>
+</Body>
+</HTML>

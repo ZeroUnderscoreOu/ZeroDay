@@ -1,0 +1,46 @@
+<HTML>
+<Head>
+	<Meta Charset="UTF-8">
+	<Style>
+		Body {
+			Padding: 10%;
+			Text-Align: Center;
+		}
+		Button {
+			Padding: 1%;
+			Vertical-Align: Middle;
+			Font-Size: 3vh;
+			Text-Shadow: 1px 1px 0px White;
+			Transition: Background-Color 1s Linear;
+		}
+	</Style>
+	<Script>
+		var Btn;
+
+		addEventListener("load", Init);
+
+		function Init() {
+			Btn = document.getElementById("Btn");
+			Btn.addEventListener("click", POpen);
+			setInterval(ChangeColor, 2000);
+		};
+
+		function POpen(Ev) {
+			if (Ev&&Ev.ctrlKey) {
+				window.open("NS_Popup.html", "_self");
+			} else {
+				window.open("NS_Popup.html", "_blank", "Width = 500, Height = 500, Popup = True");
+			};
+		};
+
+		function ChangeColor() {
+			var Clr = Math.floor(Math.random() * 256 * 256 * 256);
+			Clr = Clr.toString(16).padStart(6,"0");
+			Btn.style.backgroundColor = `#${Clr}`;
+		};
+	</Script>
+</Head>
+<Body>
+	<Button Id="Btn">Click for new window<Br>Cltr+Click for same window</Button>
+</Body>
+</HTML>
